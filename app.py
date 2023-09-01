@@ -39,7 +39,7 @@ def api_attractions():
 		conn = connect_to_db()
 	except ValueError:
 		return jsonify({'error': True, 'message': '頁數應為數字'}), 400
-	except mysql.connector.ProgrammingError:
+	except:
 		return jsonify({'error': True, 'message': '無法連線到資料庫'}), 500
 	raw_data = []
 	cursor = conn.cursor()
@@ -79,7 +79,7 @@ def api_attraction_id(attractionId):
 		conn = connect_to_db()
 	except ValueError:
 		return jsonify({'error': True, 'message': '景點編號應為數字'}), 400
-	except mysql.connector.ProgrammingError:
+	except:
 		return jsonify({'error': True, 'message': '無法連線到資料庫'}), 500
 	cursor = conn.cursor()
 	cursor.execute('SELECT * FROM sight WHERE id = %s', (attractionId,))
@@ -106,7 +106,7 @@ def api_attraction_id(attractionId):
 def mrts():
 	try:
 		conn = connect_to_db()
-	except mysql.connector.ProgrammingError:
+	except:
 		return jsonify({'error': True, 'message': '無法連線到資料庫'}), 500
 	cursor = conn.cursor()
 	cursor.execute('SELECT mrt.station FROM mrt INNER JOIN sight ON mrt.id = sight.mrt_id GROUP BY mrt.station ORDER BY COUNT(sight.mrt_id) DESC')
