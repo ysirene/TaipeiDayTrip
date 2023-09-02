@@ -70,7 +70,7 @@ def api_attractions():
 		if page == total_pages:
 			return jsonify({'nextPage': None, 'data': raw_data[12*page:]})
 		else:
-			return jsonify({'nextPage': page + 1, 'data': raw_data[12*page: 12*(page+1)+1]})
+			return jsonify({'nextPage': page + 1, 'data': raw_data[12*page: 12*(page+1)]})
 
 @app.route('/api/attraction/<attractionId>')
 def api_attraction_id(attractionId):
