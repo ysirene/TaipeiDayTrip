@@ -42,15 +42,18 @@ def api_attractions():
 	except:
 		return jsonify({'error': True, 'message': '無法連線到資料庫'}), 500
 	raw_data = []
+	offset_num = page * 12
 	cursor = conn.cursor()
 	if keyword:
-		cursor.execute('SELECT sight.* FROM sight INNER JOIN mrt ON sight.mrt_id=mrt.id WHERE mrt.station=%s or sight.name LIKE %s;', (keyword,'%'+keyword+'%'))
+		cursor.execute('SELECT sight.* FROM sight INNER JOIN mrt ON sight.mrt_id=mrt.id WHERE mrt.station=%s or sight.name LIKE %s LIMIT 13 OFFSET %s;', (keyword,'%'+keyword+'%', offset_num))
 	else:
-		cursor.execute('SELECT * FROM sight')
+		cursor.execute('SELECT * FROM sight LIMIT 13 OFFSET %s;', (offset_num,))
 	record = cursor.fetchall()
 	cursor.close()
 	conn.close()
-	for i in range(len(record)):
+	next_page = page + 1 if len(record) == 13 else None
+	loop_len = 12 if len(record) >= 12 else len(record)
+	for i in range(loop_len):
 			tmp_dic = {}
 			tmp_dic['id'] = record[i][0]
 			tmp_dic['name'] = record[i][1]
@@ -63,14 +66,7 @@ def api_attractions():
 			tmp_dic['lng'] = record[i][8]
 			tmp_dic['images'] = record[i][9].split(',')
 			raw_data.append(tmp_dic)
-	total_pages = len(raw_data) // 12
-	if page > total_pages:
-		return jsonify({'nextPage': None, 'data': []})
-	else:
-		if page == total_pages:
-			return jsonify({'nextPage': None, 'data': raw_data[12*page:]})
-		else:
-			return jsonify({'nextPage': page + 1, 'data': raw_data[12*page: 12*(page+1)]})
+	return jsonify({'nextPage': next_page, 'data': raw_data})
 
 @app.route('/api/attraction/<attractionId>')
 def api_attraction_id(attractionId):
