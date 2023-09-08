@@ -39,78 +39,10 @@
             let attractionsElem = document.querySelector('.attractions');
             let searchBtnElem = document.querySelector('.search_bar__button')
             let searchKeywordElem = document.querySelector('.search_bar__box')
-            searchBtnElem.addEventListener('click', function(e){
-                e.preventDefault();
-                keyword = searchKeywordElem.value
-                nextPage = 0
-                while (attractionsElem.hasChildNodes()){
-                    attractionsElem.removeChild(attractionsElem.lastChild);
-                };
-                getAttractionsData(nextPage, keyword);
-            });
-            // 捷運站選單相關
             let leftArrowElem = document.querySelector('.list_bar__left_arrow');
             let rightArrowElem = document.querySelector('.list_bar__right_arrow');
             let containerElem = document.querySelector('.container');
             let browserWidth = window.innerWidth;
-            leftArrowElem.addEventListener('click', () => {
-                containerElem.scrollLeft -= (browserWidth-230);
-            });
-            rightArrowElem.addEventListener('click', () => {
-                containerElem.scrollLeft += (browserWidth-230);
-            });
-            function searchMrt(btn){
-                searchKeywordElem.value = btn.textContent;
-                searchBtnElem.click();
-            };
-            (function getMrtsList(){
-                fetch('/api/mrts').then(function(response){
-                    return response.json();
-                }).then(function(data){
-                    for(let i=0; i<data['data'].length; i++){
-                        let mrtButton = document.createElement('button');
-                        mrtButton.className = 'list_item';
-                        mrtButton.setAttribute('onclick', 'searchMrt(this)')
-                        mrtButton.textContent = data['data'][i];
-                        containerElem.appendChild(mrtButton);
-                    };
-                }).catch(function(error){
-                    alert(error['message']);
-                });
-            })();
-
-            // 渲染畫面
-            function renderAttractions(data){
-                // Box
-                let attractionBoxDiv = document.createElement('div');
-                attractionBoxDiv.className = 'attraction__box';
-                // Name
-                let attractionNameDiv = document.createElement('div');
-                attractionNameDiv.className = 'attraction__name';
-                // detail
-                let attractionDetailDiv = document.createElement('div');
-                attractionDetailDiv.className = 'attraction__detail';
-                for(i=0; i<data['data'].length; i++){
-                    let attractionBoxDivClone = attractionBoxDiv.cloneNode(true);
-                    attractionsElem.appendChild(attractionBoxDivClone);
-                    let attractionBoxElem = document.querySelector('.attractions').lastChild;
-                    let attractionImg = document.createElement('img');
-                    attractionImg.setAttribute('src',data['data'][i]['images'][0]);
-                    attractionBoxElem.appendChild(attractionImg)
-                    let attractionNameDivClone = attractionNameDiv.cloneNode(true);
-                    attractionNameDivClone.textContent = data['data'][i]['name'];
-                    attractionBoxElem.appendChild(attractionNameDivClone);
-                    let attractionDetailDivClone = attractionDetailDiv.cloneNode(true);
-                    let mrtDiv = document.createElement('div');
-                    let catDiv = document.createElement('div');
-                    mrtDiv.textContent = data['data'][i]['mrt'];
-                    catDiv.textContent = data['data'][i]['category'];
-                    attractionBoxElem.appendChild(attractionDetailDivClone);
-                    let attractionDetailElem = attractionBoxElem.lastChild;
-                    attractionDetailElem.appendChild(mrtDiv);
-                    attractionDetailElem.appendChild(catDiv);
-                };
-            };
             // 捲動顯示下一頁
             const callback = (entries) => {
                 if(entries[0].isIntersecting && nextPage != null){
@@ -121,8 +53,64 @@
                 };
             };
             const observer = new IntersectionObserver(callback);
-            // 取得景點DATA並渲染
-            function getAttractionsData(page=null, keyword=null){
+            // 捷運清單捲動
+            leftArrowElem.addEventListener('click', () => {
+                containerElem.scrollLeft -= (browserWidth-230);
+            });
+            rightArrowElem.addEventListener('click', () => {
+                containerElem.scrollLeft += (browserWidth-230);
+            });
+            // 捷運站清單按鈕
+            function searchMrt(btn){
+                searchKeywordElem.value = btn.textContent;
+                searchBtnElem.click();
+            };
+            // 取得捷運列表
+            (function getMrtsList(){
+                fetch('/api/mrts').then(function(response){
+                    return response.json();
+                }).then(function(data){
+                    for(let i=0; i<data['data'].length; i++){
+                        if (data['data'][i] != 'None'){
+                            let mrtButton = document.createElement('button');
+                        mrtButton.className = 'list_item';
+                        mrtButton.setAttribute('onclick', 'searchMrt(this)');
+                        mrtButton.textContent = data['data'][i];
+                        containerElem.appendChild(mrtButton);
+                        };
+                    };
+                }).catch(function(error){
+                    alert(error['message']);
+                });
+            })();
+            // 將取得的data渲染到畫面
+            function renderAttractions(data){
+                for(i=0; i<data['data'].length; i++){
+                    let attractionBoxDiv = document.createElement('div');
+                    attractionBoxDiv.className = 'attraction__box';
+                    let attractionImg = document.createElement('img');
+                    attractionImg.setAttribute('src',data['data'][i]['images'][0]);
+                    let attractionNameDiv = document.createElement('div');
+                    attractionNameDiv.className = 'attraction__name';
+                    attractionNameDiv.textContent = data['data'][i]['name'];
+                    let attractionDetailDiv = document.createElement('div');
+                    attractionDetailDiv.className = 'attraction__detail';
+                    let mrtDiv = document.createElement('div');
+                    mrtDiv.textContent = data['data'][i]['mrt'];
+                    let catDiv = document.createElement('div');
+                    catDiv.textContent = data['data'][i]['category'];
+                    attractionsElem.appendChild(attractionBoxDiv);
+                    let attractionBoxElem = document.querySelector('.attractions').lastChild;
+                    attractionBoxElem.appendChild(attractionImg)
+                    attractionBoxElem.appendChild(attractionNameDiv);
+                    attractionBoxElem.appendChild(attractionDetailDiv);
+                    let attractionDetailElem = attractionBoxElem.lastChild;
+                    attractionDetailElem.appendChild(mrtDiv);
+                    attractionDetailElem.appendChild(catDiv);
+                };
+            };
+            // 取得景點DATA後渲染&無限捲動
+            function getAttractionsData(page, keyword){
                 fetch(`/api/attractions?page=${encodeURIComponent(page)}&keyword=${encodeURIComponent(keyword)}`).then(function(response){
                     return response.json();
                 }).then(function(data){
@@ -137,6 +125,16 @@
                     alert(error['message'])
                 });
             };
+            // 搜尋框按鈕
+            searchBtnElem.addEventListener('click', function(e){
+                e.preventDefault();
+                keyword = searchKeywordElem.value
+                nextPage = 0
+                while (attractionsElem.hasChildNodes()){
+                    attractionsElem.removeChild(attractionsElem.lastChild);
+                };
+                getAttractionsData(nextPage, keyword);
+            });
             getAttractionsData(nextPage, keyword);
         </script>
     </body>
