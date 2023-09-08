@@ -61,7 +61,7 @@ def api_attractions():
 			tmp_dic['description'] = record[i][3]
 			tmp_dic['address'] = record[i][4]
 			tmp_dic['transport'] = record[i][5]
-			tmp_dic['mrt'] = record[i][10]
+			tmp_dic['mrt'] = None if record[i][10]=='None' else record[i][10]
 			tmp_dic['lat'] = record[i][7]
 			tmp_dic['lng'] = record[i][8]
 			tmp_dic['images'] = record[i][11].split(',')
@@ -111,4 +111,5 @@ def mrts():
 	return jsonify({'data': record})
 
 	
-app.run(host="0.0.0.0", port=3000)
+# app.run(host="0.0.0.0", port=3000)
+app.run(port=3000)
