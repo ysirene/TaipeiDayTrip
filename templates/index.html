@@ -42,7 +42,6 @@
             let leftArrowElem = document.querySelector('.list_bar__left_arrow');
             let rightArrowElem = document.querySelector('.list_bar__right_arrow');
             let containerElem = document.querySelector('.container');
-            let browserWidth = window.innerWidth;
             // 捲動顯示下一頁
             const callback = (entries) => {
                 if(entries[0].isIntersecting && nextPage != null){
@@ -55,10 +54,10 @@
             const observer = new IntersectionObserver(callback);
             // 捷運清單捲動
             leftArrowElem.addEventListener('click', () => {
-                containerElem.scrollLeft -= (browserWidth-230);
+                containerElem.scrollLeft -= (containerElem.clientWidth-100);
             });
             rightArrowElem.addEventListener('click', () => {
-                containerElem.scrollLeft += (browserWidth-230);
+                containerElem.scrollLeft += (containerElem.clientWidth-100);
             });
             // 捷運站清單按鈕
             function searchMrt(btn){

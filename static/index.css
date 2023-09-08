@@ -50,7 +50,7 @@ body{
     font-family: 'Noto Sans TC', sans-serif;
 }
 .hero_section{
-    height: 480px;
+    height: 320px;
     overflow: hidden;
     background-size: cover;
     background-image: url("index_hero_section.png");
@@ -139,6 +139,7 @@ body{
     width: 1066px;
     overflow: hidden;
     white-space: nowrap;
+    scroll-behavior: smooth;
 }
 .list_item{
     display: inline-block;
