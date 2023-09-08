@@ -45,9 +45,9 @@ def api_attractions():
 	offset_num = page * 12
 	cursor = conn.cursor()
 	if keyword:
-		cursor.execute('SELECT sight.* FROM sight INNER JOIN mrt ON sight.mrt_id=mrt.id WHERE mrt.station=%s or sight.name LIKE %s LIMIT 13 OFFSET %s;', (keyword,'%'+keyword+'%', offset_num))
+		cursor.execute('SELECT sight.*, category.cat, mrt.station, GROUP_CONCAT(DISTINCT image.url ORDER BY image.id ASC) FROM sight INNER JOIN mrt ON sight.mrt_id=mrt.id INNER JOIN category ON sight.category_id=category.id INNER JOIN image ON sight.id=image.sight_id WHERE mrt.station=%s or sight.name LIKE %s GROUP BY sight.id LIMIT 13 OFFSET %s;', (keyword,'%'+keyword+'%', offset_num))
 	else:
-		cursor.execute('SELECT * FROM sight LIMIT 13 OFFSET %s;', (offset_num,))
+		cursor.execute('SELECT sight.*, category.cat, mrt.station, GROUP_CONCAT(DISTINCT image.url ORDER BY image.id ASC) FROM sight INNER JOIN mrt ON sight.mrt_id=mrt.id INNER JOIN category ON sight.category_id=category.id INNER JOIN image ON sight.id=image.sight_id GROUP BY sight.id LIMIT 13 OFFSET %s;', (offset_num,))
 	record = cursor.fetchall()
 	cursor.close()
 	conn.close()
@@ -57,14 +57,14 @@ def api_attractions():
 			tmp_dic = {}
 			tmp_dic['id'] = record[i][0]
 			tmp_dic['name'] = record[i][1]
-			tmp_dic['category'] = record[i][2]
+			tmp_dic['category'] = record[i][9]
 			tmp_dic['description'] = record[i][3]
 			tmp_dic['address'] = record[i][4]
 			tmp_dic['transport'] = record[i][5]
-			tmp_dic['mrt'] = record[i][6]
+			tmp_dic['mrt'] = None if record[i][10]=='None' else record[i][10]
 			tmp_dic['lat'] = record[i][7]
 			tmp_dic['lng'] = record[i][8]
-			tmp_dic['images'] = record[i][9].split(',')
+			tmp_dic['images'] = record[i][11].split(',')
 			raw_data.append(tmp_dic)
 	return jsonify({'nextPage': next_page, 'data': raw_data})
 
@@ -78,7 +78,7 @@ def api_attraction_id(attractionId):
 	except:
 		return jsonify({'error': True, 'message': '無法連線到資料庫'}), 500
 	cursor = conn.cursor()
-	cursor.execute('SELECT * FROM sight WHERE id = %s', (attractionId,))
+	cursor.execute('SELECT sight.*, category.cat, mrt.station, GROUP_CONCAT(DISTINCT image.url ORDER BY image.id ASC) FROM sight INNER JOIN mrt ON sight.mrt_id=mrt.id INNER JOIN category ON sight.category_id=category.id INNER JOIN image ON sight.id=image.sight_id WHERE sight.id = %s GROUP BY sight.id', (attractionId,))
 	record = cursor.fetchone()
 	cursor.close()
 	conn.close()
@@ -88,14 +88,14 @@ def api_attraction_id(attractionId):
 		response_data = {'data': {}}
 		response_data['data']['id'] = record[0]
 		response_data['data']['name'] = record[1]
-		response_data['data']['category'] = record[2]
+		response_data['data']['category'] = record[9]
 		response_data['data']['description'] = record[3]
 		response_data['data']['address'] = record[4]
 		response_data['data']['transport'] = record[5]
-		response_data['data']['mrt'] = record[6]
+		response_data['data']['mrt'] = record[10]
 		response_data['data']['lat'] = record[7]
 		response_data['data']['lng'] = record[8]
-		response_data['data']['images'] = record[9].split(',')
+		response_data['data']['images'] = record[11].split(',')
 		return jsonify(response_data)
 	
 @app.route('/api/mrts')
@@ -105,7 +105,7 @@ def mrts():
 	except:
 		return jsonify({'error': True, 'message': '無法連線到資料庫'}), 500
 	cursor = conn.cursor()
-	cursor.execute('SELECT mrt.station FROM mrt INNER JOIN sight ON mrt.id = sight.mrt_id GROUP BY mrt.station ORDER BY COUNT(sight.mrt_id) DESC')
+	cursor.execute('SELECT mrt.station FROM mrt INNER JOIN sight ON mrt.id = sight.mrt_id GROUP BY mrt_id ORDER BY COUNT(sight.mrt_id) DESC;')
 	record = cursor.fetchall()
 	record = [item[0] for item in record]
 	return jsonify({'data': record})

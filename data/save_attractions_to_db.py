@@ -6,8 +6,10 @@ import re
 
 with open('taipei-attractions.json', mode = 'r', encoding = 'utf-8') as file:
     data = json.load(file)
-station_id = {}
-num = 1
+mrt_id = {}
+mrt_num = 1
+category_id = {}
+category_num = 1
 
 load_dotenv()
 conn = mysql.connector.connect(
@@ -20,46 +22,43 @@ cursor = conn.cursor()
 for i in range(len(data['result']['results'])):
     attraction = data['result']['results'][i]
     if attraction['MRT'] == None:
-        pass
-    elif attraction['MRT'] not in station_id:
-        station_id[attraction['MRT']] = num
-        num += 1
+        mrt_id['None'] = mrt_num
+        mrt_num += 1
+    elif attraction['MRT'] not in mrt_id:
+        mrt_id[attraction['MRT']] = mrt_num
+        mrt_num += 1
+    if attraction['CAT'] not in category_id:
+        category_id[attraction['CAT']] = category_num
+        category_num += 1
+    sight_data = (
+        attraction['_id'],
+        attraction['name'],
+        category_id[attraction['CAT']],
+        attraction['description'],
+        attraction['address'],
+        attraction['direction'],
+        mrt_id['None'] if attraction['MRT']==None else mrt_id[attraction['MRT']],
+        attraction['latitude'],
+        attraction['longitude'],
+    )
+    cursor.execute('INSERT INTO sight(id, name, category_id, description, address, transport, mrt_id, lat, lng) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s);', sight_data)
+    conn.commit()
+
     urls = attraction['file'].split('http')
-    image_data = []
     for url in urls:
         if re.match('.+\.jpg', url) or re.match('.+\.JPG', url):
-            image_data.append('http' + url)
-    try:
-        sight_data = (
-            attraction['_id'],
-            attraction['name'],
-            attraction['CAT'],
-            attraction['description'],
-            attraction['address'],
-            attraction['direction'],
-            station_id[attraction['MRT']],
-            attraction['latitude'],
-            attraction['longitude'],
-            ','.join(image_data)
-        )
-    except:
-        sight_data = (
-            attraction['_id'],
-            attraction['name'],
-            attraction['CAT'],
-            attraction['description'],
-            attraction['address'],
-            attraction['direction'],
-            None,
-            attraction['latitude'],
-            attraction['longitude'],
-            ','.join(image_data)
-        )
-    cursor.execute('INSERT INTO sight(id, name, category, description, address, transport, mrt_id, lat, lng, images) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);', sight_data)
-    conn.commit()
-for station in station_id:
-    mrt_data = (station_id[station], station)
+            image_data = (attraction['_id'], 'http' + url)
+            cursor.execute('INSERT INTO image(sight_id, url) VALUES(%s, %s);', image_data)
+            conn.commit()
+
+for station in mrt_id:
+    mrt_data = (mrt_id[station], station)
     cursor.execute('INSERT INTO mrt(id, station) VALUES(%s, %s);', mrt_data)
+    conn.commit()
+
+for category in category_id:
+    category_data = (category_id[category], category)
+    cursor.execute('INSERT INTO category(id, cat) VALUES(%s, %s);', category_data)
     conn.commit()
 
 cursor.close()

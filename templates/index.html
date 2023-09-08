@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="../static/index.css">
+        <title>Taipei Trip 台北一日遊</title>
+    </head>
+    <body>
+        <div class="navigation__background">
+            <div class="navigation">
+                <div class="navigation__title">台北一日遊</div>
+                <div class="navigation__menu">
+                    <button class="navigation__button">預定行程</button>
+                    <button class="navigation__button">登入/註冊</button>
+                </div>
+            </div>
+        </div>
+        <div class="hero_section">
+            <div class="slogan">
+                <div class="slogan__title">輕鬆享受台北一日悠閒</div>
+                <div class="slogan__body">探索每個角落，體驗城市的深度旅遊行程</div>
+                <form class="search_bar">
+                    <input class="search_bar__box" type="text" placeholder="輸入景點名稱查詢">
+                    <button class="search_bar__button"><img class="search_bar__icon" src="../static/search_icon.png"></button>
+                </form>
+            </div>
+        </div>
+        <div class="list_bar">
+            <button class="list_bar__left_arrow"></button>
+            <div class="container"></div>
+            <button class="list_bar__right_arrow"></button>
+        </div>
+        <div class="attractions"></div>
+        <div class="footer">COPYRIGHT © 2021 台北一日遊</div>
+        <script>
+            let nextPage = 0;
+            let keyword = '';
+            let attractionsElem = document.querySelector('.attractions');
+            let searchBtnElem = document.querySelector('.search_bar__button')
+            let searchKeywordElem = document.querySelector('.search_bar__box')
+            let leftArrowElem = document.querySelector('.list_bar__left_arrow');
+            let rightArrowElem = document.querySelector('.list_bar__right_arrow');
+            let containerElem = document.querySelector('.container');
+            // 捲動顯示下一頁
+            const callback = (entries) => {
+                if(entries[0].isIntersecting && nextPage != null){
+                    getAttractionsData(nextPage, keyword)
+                    observer.unobserve(entries[0].target);
+                }else if(nextPage == null){
+                    observer.disconnect()
+                };
+            };
+            const observer = new IntersectionObserver(callback);
+            // 捷運清單捲動
+            leftArrowElem.addEventListener('click', () => {
+                containerElem.scrollLeft -= (containerElem.clientWidth-100);
+            });
+            rightArrowElem.addEventListener('click', () => {
+                containerElem.scrollLeft += (containerElem.clientWidth-100);
+            });
+            // 捷運站清單按鈕
+            function searchMrt(btn){
+                searchKeywordElem.value = btn.textContent;
+                searchBtnElem.click();
+            };
+            // 取得捷運列表
+            (function getMrtsList(){
+                fetch('/api/mrts').then(function(response){
+                    return response.json();
+                }).then(function(data){
+                    for(let i=0; i<data['data'].length; i++){
+                        if (data['data'][i] != 'None'){
+                            let mrtButton = document.createElement('button');
+                        mrtButton.className = 'list_item';
+                        mrtButton.setAttribute('onclick', 'searchMrt(this)');
+                        mrtButton.textContent = data['data'][i];
+                        containerElem.appendChild(mrtButton);
+                        };
+                    };
+                }).catch(function(error){
+                    alert(error['message']);
+                });
+            })();
+            // 將取得的data渲染到畫面
+            function renderAttractions(data){
+                for(i=0; i<data['data'].length; i++){
+                    let attractionBoxDiv = document.createElement('div');
+                    attractionBoxDiv.className = 'attraction__box';
+                    let attractionImg = document.createElement('img');
+                    attractionImg.setAttribute('src',data['data'][i]['images'][0]);
+                    let attractionNameDiv = document.createElement('div');
+                    attractionNameDiv.className = 'attraction__name';
+                    attractionNameDiv.textContent = data['data'][i]['name'];
+                    let attractionDetailDiv = document.createElement('div');
+                    attractionDetailDiv.className = 'attraction__detail';
+                    let mrtDiv = document.createElement('div');
+                    mrtDiv.textContent = data['data'][i]['mrt'];
+                    let catDiv = document.createElement('div');
+                    catDiv.textContent = data['data'][i]['category'];
+                    attractionsElem.appendChild(attractionBoxDiv);
+                    let attractionBoxElem = document.querySelector('.attractions').lastChild;
+                    attractionBoxElem.appendChild(attractionImg)
+                    attractionBoxElem.appendChild(attractionNameDiv);
+                    attractionBoxElem.appendChild(attractionDetailDiv);
+                    let attractionDetailElem = attractionBoxElem.lastChild;
+                    attractionDetailElem.appendChild(mrtDiv);
+                    attractionDetailElem.appendChild(catDiv);
+                };
+            };
+            // 取得景點DATA後渲染&無限捲動
+            function getAttractionsData(page, keyword){
+                fetch(`/api/attractions?page=${encodeURIComponent(page)}&keyword=${encodeURIComponent(keyword)}`).then(function(response){
+                    return response.json();
+                }).then(function(data){
+                    nextPage = data['nextPage']
+                    if(data['data'].length == 0){
+                        attractionsElem.textContent = '找不到相關的景點'
+                    }else{
+                        renderAttractions(data);
+                        observer.observe(document.querySelector('.attractions').lastChild);
+                    }
+                }).catch(function(error){
+                    alert(error['message'])
+                });
+            };
+            // 搜尋框按鈕
+            searchBtnElem.addEventListener('click', function(e){
+                e.preventDefault();
+                keyword = searchKeywordElem.value
+                nextPage = 0
+                while (attractionsElem.hasChildNodes()){
+                    attractionsElem.removeChild(attractionsElem.lastChild);
+                };
+                getAttractionsData(nextPage, keyword);
+            });
+            getAttractionsData(nextPage, keyword);
+        </script>
+    </body>
+</html>
