@@ -22,37 +22,25 @@ cursor = conn.cursor()
 for i in range(len(data['result']['results'])):
     attraction = data['result']['results'][i]
     if attraction['MRT'] == None:
-        pass
+        mrt_id['None'] = mrt_num
+        mrt_num += 1
     elif attraction['MRT'] not in mrt_id:
         mrt_id[attraction['MRT']] = mrt_num
         mrt_num += 1
     if attraction['CAT'] not in category_id:
         category_id[attraction['CAT']] = category_num
         category_num += 1
-    try:
-        sight_data = (
-            attraction['_id'],
-            attraction['name'],
-            category_id[attraction['CAT']],
-            attraction['description'],
-            attraction['address'],
-            attraction['direction'],
-            mrt_id[attraction['MRT']],
-            attraction['latitude'],
-            attraction['longitude'],
-        )
-    except:
-        sight_data = (
-            attraction['_id'],
-            attraction['name'],
-            category_id[attraction['CAT']],
-            attraction['description'],
-            attraction['address'],
-            attraction['direction'],
-            None,
-            attraction['latitude'],
-            attraction['longitude'],
-        )
+    sight_data = (
+        attraction['_id'],
+        attraction['name'],
+        category_id[attraction['CAT']],
+        attraction['description'],
+        attraction['address'],
+        attraction['direction'],
+        mrt_id['None'] if attraction['MRT']==None else mrt_id[attraction['MRT']],
+        attraction['latitude'],
+        attraction['longitude'],
+    )
     cursor.execute('INSERT INTO sight(id, name, category_id, description, address, transport, mrt_id, lat, lng) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s);', sight_data)
     conn.commit()
 
