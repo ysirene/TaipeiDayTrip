@@ -1,0 +1,326 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+
+body{
+    margin: 91px 0 0;
+    font-family: 'Noto Sans TC', sans-serif;
+}
+a:link { text-decoration: none; }
+a:visited { text-decoration: none; }
+a:hover { text-decoration: none; }
+a:active { text-decoration: none; }
+.navigation__background{
+    position: fixed;
+    top: 0;
+    background-color: #FFF;
+    border:solid 1px #E8E8E8;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 54px;
+    width: 100%;
+    z-index: 500;
+}
+.navigation{
+    position: fixed;
+    top: 0;
+    width: 1200px;
+    height: 54px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 501;
+}
+.navigation__title{
+    width: auto;
+    font-size: 30px;
+    font-weight: 700;
+    color: #448899;
+    line-height: 34px;
+    cursor: pointer;
+}
+.navigation__menu{
+    width: auto;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+.navigation__button{
+    padding: 10px;
+    background-color: #FFF;
+    border: none;
+    color: #666;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 13.3px;
+    cursor: pointer;
+}
+.profile{
+    display: flex;
+    flex-wrap: wrap;
+    width: 1200px;
+    margin: 37px auto 0;
+}
+.profile__slide_show{
+    width: 540px;
+    height: 400px;
+    margin: 0 15px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 5px;
+}
+.profile__slide_show img{
+    display: block;
+    object-fit: cover;
+    position: absolute;
+    width: 100%;
+    height: 400px;
+}
+.hide_img{
+    visibility: hidden;
+}
+.fade_in, .fade_out{
+    animation: fade_in 0.7s ease-in-out;
+}
+@keyframes fade_in{
+    from {opacity: 0;}
+    to {opacity: 1;}
+}
+.fade_out{
+    animation: fade_out 1s ease-in-out;
+    opacity: 0;
+}
+@keyframes fade_out{
+    from {opacity: 1;}
+    to {opacity: 0;}
+}
+.profile__prev_slide_btn, .profile__next_slide_btn{
+    cursor: pointer;
+    position: absolute;
+    top: 185px;
+    padding: 0;
+    width: 36px;
+    height: 36px;
+    border: none;
+    background-color: transparent;
+    opacity: 0.75;
+    z-index: 450;
+}
+.profile__prev_slide_btn{
+    left: 25px;
+    background-image: url(prev_img_btn.png);
+}
+.profile__next_slide_btn{
+    right: 25px;
+    background-image: url(next_img_btn.png);
+}
+.profile__slide_choice{
+    position: absolute;
+    width: 100%;
+    height: 12px;
+    bottom: 13px;
+    z-index: 450;
+    text-align: center;
+}
+.profile__slide_choice span{
+    cursor: pointer;
+    height: 12px;
+    width: 12px;
+    margin: 0 6px;
+    background-image: url(img_picker_w.png);
+    display: inline-block;
+    opacity: 0.75;
+}
+.profile__info_container{
+    margin: 0 15px;
+    width: 600px;
+}
+.profile__info_name{
+    color: #666;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 33px;
+}
+.profile__info_cat_mrt{
+    margin: 15px 0 20px;
+    color: #666;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 22px;
+}
+.booking{
+    padding: 0 20px;
+    width: 560px;
+    height: 310px;
+    border-radius: 5px;
+    background-color: #E8E8E8;
+    color: #666;
+    font-size: 16px;
+    font-weight: 500;
+}
+.booking__slogan{
+    padding-top: 15px;
+    line-height: 24px
+}
+.booking__title{
+    padding-top: 15px;
+    font-weight: 700;
+}
+.booking__form_object{
+    width: 100%;
+    padding-top: 15px;
+    position: relative;
+}
+.booking__date{
+    width: 173px;
+    height: 25px;
+    border: none;
+    margin-left: 5px;
+    padding: 5px 15px 5px 5px;
+    color: #000;
+}
+.booking__date_icon{
+    position: absolute;
+    background: #fff;
+    top: 21px;
+    left: 245px;
+    width: 24px;
+    height: 24px;
+    pointer-events: none;
+}
+.booking__date_icon button{
+    width: 24px;
+    height: 24px;
+    background-color: transparent;
+    border: none;
+    background-image: url(calendar_icon.png);
+}
+.booking__time_item{
+    position: relative;
+    padding-left: 28px;
+    margin: 0 8px 0 10px;
+}
+.booking__time_item input{
+    /* 隱藏預設的按鈕 */
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+.booking__checkmark{
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 22px;
+    width: 22px;
+    background-color: white;
+    border-radius: 50%;
+    cursor: pointer;
+}
+.booking__checkmark:after{
+    content: "";
+    position: absolute;
+    display: none;
+}
+.booking__time_item input:checked ~ .booking__checkmark:after{
+    display: block;
+}
+.booking__time_item .booking__checkmark:after{
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #448899;
+}
+.booking__price{
+    margin-left: 5px;
+}
+.booking__submit{
+    margin-top: 10px;
+    padding: 0;
+    width: 154px;
+    height: 36px;
+    border: none;
+    border-radius: 5px;
+    background-color: #489;
+    color: #FFF;
+    font-size: 19px;
+    font-weight: 400;
+    cursor: pointer;
+}
+.separator{
+    border: 1px #E8E8E8 solid;
+    margin: 40px 0 50px;
+}
+.detail__text{
+    margin: 0 auto 20px;
+    color: #666;
+    font-size: 16px;
+    font-weight: 400;
+    width: 1180px;
+    line-height: 23px;
+}
+.detail__title{
+    width: 1180px;
+    margin: 0 auto;
+    color:#666;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 32px;
+}
+.footer{
+    width: 100%;
+    height: 104px;
+    margin-top: 100px;
+    background-color: #757575;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color:#FFF;
+    font-size: 16px;
+    font-weight: 700;
+}
+@media(max-width:1200px){
+    .navigation{
+        width: 100%;
+    }
+    .navigation__title{
+        margin-left: 10px;
+    }
+    .profile{
+        width: 100%;
+    }
+    .profile__slide_show{
+        width: calc(50% - 30px);
+    }
+    .profile__info_container{
+        width: calc(50% - 30px);
+    }
+    .booking{
+        width: calc(100% - 40px);
+    }
+    .detail__text{
+        width: calc(100% - 20px);
+    }
+    .detail__title{
+        width: calc(100% - 20px);
+    }
+}
+@media(max-width:800px){
+    .profile__slide_show{
+        width: 100%;
+        margin: 0 0 20px 0;
+    }
+    .profile__info_container{
+        width: calc(100% - 20px);
+        margin: 0 auto;
+    }
+    .booking{
+        width: calc(100% - 40px);
+        height: 300px;
+    }
+    .footer{
+        margin-top: 114px;
+    }
+}

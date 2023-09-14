@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" type="text/css" href="../static/attraction.css">
+        <title>Taipei Trip 台北一日遊</title>
+    </head>
+    <body>
+        <div class="navigation__background">
+            <div class="navigation">
+                <a href="/"><div class="navigation__title">台北一日遊</div></a>
+                <div class="navigation__menu">
+                    <button class="navigation__button">預定行程</button>
+                    <button class="navigation__button">登入/註冊</button>
+                </div>
+            </div>
+        </div>
+        <div class="profile">
+            <div class="profile__slide_show">
+                <div class="profile__slide_choice"></div>
+                <button class="profile__prev_slide_btn" onclick="prevSlide()"></button>
+                <button class="profile__next_slide_btn" onclick="nextSlide()"></button>
+            </div>
+            <div class="profile__info_container">
+                <div class="profile__info_name"></div>
+                <div class="profile__info_cat_mrt"></div>
+                <div class="booking">
+                    <div class="booking__title">訂購導覽行程</div>
+                    <div class="booking__slogan">以此景點為中心的一日行程，帶您探索城市角落故事</div>
+                    <form>
+                        <div class="booking__form_object">
+                            <span class="booking__title">選擇日期：</span>
+                            <input type="date" class="booking__date" name="booking_date" required>
+                            <span class="booking__date_icon">
+                                <button type="button"></button>
+                            </span>
+                        </div>
+                        <div class="booking__form_object">
+                            <span class="booking__title">選擇時間：</span>
+                            <label class="booking__time_item">上半天
+                                <input type="radio" name="booking_time" value="forenoon"checked>
+                                <span class="booking__checkmark"></span>
+                            </label>
+                            <label class="booking__time_item">下半天
+                                <input type="radio" name="booking_time" value="afternoon">
+                                <span class="booking__checkmark"></span>
+                            </label>
+                        </div>
+                        <div class="booking__form_object">
+                            <span class="booking__title">導覽費用：</span>
+                            <span class="booking__price">新台幣 2000 元</span>                            
+                        </div>
+                        <div class="booking__form_object">
+                            <input type="submit" value="開始預約行程" class="booking__submit">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <hr class="separator">
+        <div class="detail__text" id="description"></div>
+        <div class="detail__title">景點地址：</div>
+        <div  class="detail__text" id="address"></div>
+        <div class="detail__title">交通方式：</div>
+        <div  class="detail__text" id="transport"></div>
+        <div class="footer">COPYRIGHT © 2021 台北一日遊</div>
+        <script>
+            const attraction_id = window.location.pathname.split('/')[2];
+            let totalImages = 0
+            fetch(`/api/attraction/${attraction_id}`).then(function(response){
+                return response.json();
+            }).then(function(data){
+                if(data.error){
+                    window.location.href = '/';
+                }else{
+                    let attractionNameElem = document.querySelector('.profile__info_name');
+                    let attractionCatMrtElem = document.querySelector('.profile__info_cat_mrt');
+                    let attractionDescriptionElem = document.querySelector('#description');
+                    let attractionAddressElem = document.querySelector('#address');
+                    let attractionTransportElem = document.querySelector('#transport');
+                    attractionNameElem.textContent = data['data']['name'];
+                    attractionCatMrtElem.textContent = data['data']['category'] + ' at ' + data['data']['mrt'];
+                    attractionDescriptionElem.textContent = data['data']['description'];
+                    attractionAddressElem.textContent = data['data']['address'];
+                    attractionTransportElem.textContent = data['data']['transport'];
+                    // 處理照片輪播
+                    let imagesArr = data['data']['images'];
+                    let slideContainerElem = document.querySelector('.profile__slide_show');
+                    totalImages = imagesArr.length;
+                    for(let i=0;i<imagesArr.length;i++){
+                        let image = document.createElement('img');
+                        image.setAttribute('src', imagesArr[i]);
+                        if(i==0){
+                            image.className = 'fade_in';
+                        }else{
+                            image.className = 'hide_img';
+                        };
+                        slideContainerElem.appendChild(image);
+                    };
+                    for(let i=0;i<imagesArr.length;i++){
+                        let slideChoiceElem = document.querySelector('.profile__slide_choice');
+                        let choiceSpan = document.createElement('span')
+                        choiceSpan.setAttribute('onclick',`changeSlide(${i})`);
+                        if(i == 0){
+                            choiceSpan.style.backgroundImage = 'url(../static/img_picker_b.png)';
+                            choiceSpan.id = 'choice_picked';
+                        };
+                        slideChoiceElem.appendChild(choiceSpan);
+                    };
+                };
+            });
+            let currentSlideIdx = 0;
+            function changeSlide(num){
+                let fadeOutSlide = document.querySelector('.fade_in');
+                let pastChoiceElem = document.querySelector('#choice_picked');
+                let choiceElem = document.querySelector('.profile__slide_choice').children[num];
+                let imgElem = document.getElementsByTagName('img');
+                fadeOutSlide.className = 'fade_out';
+                pastChoiceElem.style.backgroundImage = 'url(../static/img_picker_w.png)';
+                pastChoiceElem.removeAttribute('id');
+                choiceElem.style.backgroundImage = 'url(../static/img_picker_b.png)';
+                choiceElem.id = 'choice_picked';
+                imgElem[num].className = 'fade_in';
+                console.log('change to: ' + num);
+            }
+            function prevSlide(){
+                currentSlideIdx = (currentSlideIdx - 1);
+                if(currentSlideIdx < 0){
+                    currentSlideIdx += totalImages;
+                };
+                changeSlide(currentSlideIdx);
+            };
+            function nextSlide(){
+                currentSlideIdx = (currentSlideIdx + 1) % totalImages;
+                changeSlide(currentSlideIdx);
+            };
+            // 最早的預約日期是今天
+            let today = new Date().toISOString().split('T')[0];
+            let bookingDateElem = document.querySelector('.booking__date');
+            bookingDateElem.min = today;
+            // 根據時段改變價錢
+            let bookingTimeElem = document.querySelectorAll('input[name="booking_time"]');
+            let bookingPriceElem = document.querySelector('.booking__price');
+            bookingTimeElem.forEach((elem) => {
+                elem.addEventListener('change', function(event){
+                    time = event.target.value;
+                    if(time == 'forenoon'){
+                        bookingPriceElem.textContent = '新台幣 2000 元';
+                    }else{
+                        bookingPriceElem.textContent = '新台幣 2500 元';
+                    };
+                });
+            });
+        </script>
+    </body>
+</html>
