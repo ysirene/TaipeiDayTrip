@@ -249,8 +249,11 @@ a:active { text-decoration: none; }
     cursor: pointer;
 }
 .separator{
-    border: 1px #E8E8E8 solid;
-    margin: 40px 0 50px;
+    border: none;
+    width: 1200px;
+    height: 1px;
+    background-color: #E8E8E8;
+    margin: 40px auto 50px;
 }
 .detail__text{
     margin: 0 auto 20px;
@@ -305,6 +308,10 @@ a:active { text-decoration: none; }
     }
     .detail__title{
         width: calc(100% - 20px);
+    }
+    .separator{
+        width: calc(100% - 20px);
+        margin: 40px auto 50px;
     }
 }
 @media(max-width:800px){
