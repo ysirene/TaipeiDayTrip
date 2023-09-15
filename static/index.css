@@ -4,6 +4,10 @@ body{
     margin: 54px 0 0;
     font-family: 'Noto Sans TC', sans-serif;
 }
+a:link { text-decoration: none; }
+a:visited { text-decoration: none; }
+a:hover { text-decoration: none; }
+a:active { text-decoration: none; }
 .navigation__background{
     position: fixed;
     top: 0;
@@ -32,6 +36,7 @@ body{
     font-weight: 700;
     color: #448899;
     line-height: 34px;
+    cursor: pointer;
 }
 .navigation__menu{
     width: auto;
@@ -47,7 +52,7 @@ body{
     font-size: 16px;
     font-weight: 500;
     line-height: 13.3px;
-    font-family: 'Noto Sans TC', sans-serif;
+    cursor: pointer;
 }
 .hero_section{
     height: 320px;
@@ -99,6 +104,7 @@ body{
     background-color: #489;
     width: 60px;
     height: 46px;
+    cursor: pointer;
 }
 .search_bar__icon{
     width: 30px;
@@ -119,6 +125,7 @@ body{
     background-color: transparent;
     border: none;
     background-image: url(default_left_arrow.png);
+    cursor: pointer;
 }
 .list_bar__left_arrow:hover{
     background-image: url(hovered_left_arrow.png);
@@ -128,6 +135,7 @@ body{
     background-color: transparent;
     border: none;
     background-image: url(default_right_arrow.png);
+    cursor: pointer;
 }
 .list_bar__right_arrow:hover{
     background-image: url(hovered_right_arrow.png);
@@ -149,7 +157,7 @@ body{
     font-size: 16px;
     font-weight: 500;
     color: #666666;
-    font-family: 'Noto Sans TC', sans-serif;
+    cursor: pointer;
 }
 .list_item:hover{
     color: #000;
@@ -165,12 +173,13 @@ body{
     font-size: 24px;
 }
 .attraction__box{
+    width: 100%;
     border-radius: 5px;
     border: 1px solid #E8E8E8;
     background:#FFF;
     height: 242px;
     position: relative;
-    overflow: hidden;
+    cursor: pointer;
 }
 .attraction__box img{
     display: block;
@@ -178,19 +187,24 @@ body{
     width: 100%;
     height: 197px;
 }
+.attraction__box img:hover{
+    opacity: 0.7;
+}
 .attraction__name{
     position: absolute;
     top: 157px;
     padding-left: 10px;
     height: 40px;
     width: calc(100% - 10px);
-    display: flex;
-    align-items: center;
     background-color: rgb(0, 0, 0, 0.6);
     color: #FFF;
     font-size: 16px;
+    line-height: 40px;
     font-style: normal;
     font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
 }
 .attraction__detail{
     width: calc(100% - 20px);

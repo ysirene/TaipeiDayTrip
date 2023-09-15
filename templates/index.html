@@ -9,7 +9,7 @@
     <body>
         <div class="navigation__background">
             <div class="navigation">
-                <div class="navigation__title">台北一日遊</div>
+                <a href="/"><div class="navigation__title">台北一日遊</div></a>
                 <div class="navigation__menu">
                     <button class="navigation__button">預定行程</button>
                     <button class="navigation__button">登入/註冊</button>
@@ -37,18 +37,18 @@
             let nextPage = 0;
             let keyword = '';
             let attractionsElem = document.querySelector('.attractions');
-            let searchBtnElem = document.querySelector('.search_bar__button')
-            let searchKeywordElem = document.querySelector('.search_bar__box')
+            let searchBtnElem = document.querySelector('.search_bar__button');
+            let searchKeywordElem = document.querySelector('.search_bar__box');
             let leftArrowElem = document.querySelector('.list_bar__left_arrow');
             let rightArrowElem = document.querySelector('.list_bar__right_arrow');
             let containerElem = document.querySelector('.container');
             // 捲動顯示下一頁
             const callback = (entries) => {
                 if(entries[0].isIntersecting && nextPage != null){
-                    getAttractionsData(nextPage, keyword)
+                    getAttractionsData(nextPage, keyword);
                     observer.unobserve(entries[0].target);
                 }else if(nextPage == null){
-                    observer.disconnect()
+                    observer.disconnect();
                 };
             };
             const observer = new IntersectionObserver(callback);
@@ -72,14 +72,14 @@
                     for(let i=0; i<data['data'].length; i++){
                         if (data['data'][i] != 'None'){
                             let mrtButton = document.createElement('button');
-                        mrtButton.className = 'list_item';
-                        mrtButton.setAttribute('onclick', 'searchMrt(this)');
-                        mrtButton.textContent = data['data'][i];
-                        containerElem.appendChild(mrtButton);
+                            mrtButton.className = 'list_item';
+                            mrtButton.setAttribute('onclick', 'searchMrt(this)');
+                            mrtButton.textContent = data['data'][i];
+                            containerElem.appendChild(mrtButton);
                         };
                     };
                 }).catch(function(error){
-                    alert(error['message']);
+                    console.log(error['message']);
                 });
             })();
             // 將取得的data渲染到畫面
@@ -98,14 +98,15 @@
                     mrtDiv.textContent = data['data'][i]['mrt'];
                     let catDiv = document.createElement('div');
                     catDiv.textContent = data['data'][i]['category'];
-                    attractionsElem.appendChild(attractionBoxDiv);
-                    let attractionBoxElem = document.querySelector('.attractions').lastChild;
-                    attractionBoxElem.appendChild(attractionImg)
-                    attractionBoxElem.appendChild(attractionNameDiv);
-                    attractionBoxElem.appendChild(attractionDetailDiv);
-                    let attractionDetailElem = attractionBoxElem.lastChild;
-                    attractionDetailElem.appendChild(mrtDiv);
-                    attractionDetailElem.appendChild(catDiv);
+                    let url = document.createElement('a');
+                    url.setAttribute('href', `/attraction/${data['data'][i]['id']}`);
+                    attractionDetailDiv.appendChild(mrtDiv);
+                    attractionDetailDiv.appendChild(catDiv);
+                    attractionBoxDiv.appendChild(attractionImg);
+                    attractionBoxDiv.appendChild(attractionNameDiv);
+                    attractionBoxDiv.appendChild(attractionDetailDiv);
+                    url.appendChild(attractionBoxDiv);
+                    attractionsElem.appendChild(url);
                 };
             };
             // 取得景點DATA後渲染&無限捲動
@@ -113,22 +114,22 @@
                 fetch(`/api/attractions?page=${encodeURIComponent(page)}&keyword=${encodeURIComponent(keyword)}`).then(function(response){
                     return response.json();
                 }).then(function(data){
-                    nextPage = data['nextPage']
+                    nextPage = data['nextPage'];
                     if(data['data'].length == 0){
-                        attractionsElem.textContent = '找不到相關的景點'
+                        attractionsElem.textContent = '找不到相關的景點';
                     }else{
                         renderAttractions(data);
                         observer.observe(document.querySelector('.attractions').lastChild);
                     }
                 }).catch(function(error){
-                    alert(error['message'])
+                    console.log(error['message']);
                 });
             };
             // 搜尋框按鈕
             searchBtnElem.addEventListener('click', function(e){
                 e.preventDefault();
-                keyword = searchKeywordElem.value
-                nextPage = 0
+                keyword = searchKeywordElem.value;
+                nextPage = 0;
                 while (attractionsElem.hasChildNodes()){
                     attractionsElem.removeChild(attractionsElem.lastChild);
                 };
