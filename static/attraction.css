@@ -79,7 +79,7 @@ a:active { text-decoration: none; }
 .hide_img{
     visibility: hidden;
 }
-.fade_in, .fade_out{
+.fade_in{
     animation: fade_in 0.7s ease-in-out;
 }
 @keyframes fade_in{
@@ -87,7 +87,7 @@ a:active { text-decoration: none; }
     to {opacity: 1;}
 }
 .fade_out{
-    animation: fade_out 1s ease-in-out;
+    animation: fade_out 0.7s ease-in-out;
     opacity: 0;
 }
 @keyframes fade_out{

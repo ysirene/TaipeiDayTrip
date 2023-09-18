@@ -117,17 +117,14 @@
                 let choiceElem = document.querySelector('.profile__slide_choice').children[num];
                 let imgElem = document.getElementsByTagName('img');
                 fadeOutSlide.className = 'fade_out';
+                imgElem[num].className = 'fade_in';
                 pastChoiceElem.style.backgroundImage = 'url(../static/img_picker_w.png)';
                 pastChoiceElem.removeAttribute('id');
                 choiceElem.style.backgroundImage = 'url(../static/img_picker_b.png)';
                 choiceElem.id = 'choice_picked';
-                imgElem[num].className = 'fade_in';
             }
             function prevSlide(){
-                currentSlideIdx = (currentSlideIdx - 1);
-                if(currentSlideIdx < 0){
-                    currentSlideIdx += totalImages;
-                };
+                currentSlideIdx = (currentSlideIdx - 1 + totalImages) % totalImages;
                 changeSlide(currentSlideIdx);
             };
             function nextSlide(){
