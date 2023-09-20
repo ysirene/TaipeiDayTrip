@@ -2,6 +2,8 @@ from flask import *
 import mysql.connector
 import os
 from dotenv import load_dotenv
+import datetime
+import jwt
 
 app=Flask(__name__)
 app.config["JSON_AS_ASCII"]=False
@@ -31,6 +33,7 @@ def booking():
 def thankyou():
 	return render_template("thankyou.html")
 
+# 首頁取得景點資訊
 @app.route('/api/attractions')
 def api_attractions():
 	keyword = request.args.get('keyword', '')
@@ -68,6 +71,7 @@ def api_attractions():
 			raw_data.append(tmp_dic)
 	return jsonify({'nextPage': next_page, 'data': raw_data})
 
+# 取得特定id的景點資訊
 @app.route('/api/attraction/<attractionId>')
 def api_attraction_id(attractionId):
 	try:
@@ -97,7 +101,8 @@ def api_attraction_id(attractionId):
 		response_data['data']['lng'] = record[8]
 		response_data['data']['images'] = record[11].split(',')
 		return jsonify(response_data)
-	
+
+# 取得捷運站列表
 @app.route('/api/mrts')
 def mrts():
 	try:
@@ -109,6 +114,66 @@ def mrts():
 	record = cursor.fetchall()
 	record = [item[0] for item in record]
 	return jsonify({'data': record})
+
+# 註冊會員 POST
+@app.route('/api/user', methods = {'POST'})
+def signup():
+	data = request.get_json()
+	name = data.get('name')
+	email = data.get('email')
+	password = data.get('password')
+	signup_data = (name, email, password)
+	try:
+		conn = connect_to_db()
+	except:
+		return jsonify({'error': True, 'message': '無法連線到資料庫'}), 500
+	cursor = conn.cursor()
+	cursor.execute('SELECT * FROM member WHERE email=%s;', (email,))
+	email_has_been_used = cursor.fetchone()
+	if email_has_been_used:
+		cursor.close()
+		conn.close()
+		return jsonify({'error': True, 'message': 'Email已經註冊帳戶'}), 400
+	cursor.execute('INSERT INTO member(name, email, password) VALUES(%s, %s, %s);', signup_data)
+	conn.commit()
+	cursor.close()
+	conn.close()
+	return jsonify({'ok': True})
+
+#  驗證會員 GET / 登入會員 PUT
+@app.route(('/api/user/auth'), methods = ['GET', 'PUT'])
+def signin():
+	if request.method == 'GET':
+		# TODO: 驗證會員
+		load_dotenv()
+		secret_key = os.getenv('key')
+
+	elif request.method == 'PUT':
+		data = request.get_json()
+		email = data.get('email')
+		password = data.get('password')
+		signin_data = (email, password)
+		try:
+			conn = connect_to_db()
+		except:
+			return jsonify({'error': True, 'message': '無法連線到資料庫'}), 500
+		cursor = conn.cursor()
+		cursor.execute('SELECT id, name, email FROM member WHERE email=%s AND password=%s;',(signin_data))
+		member_info = cursor.fetchone()
+		cursor.close()
+		conn.close()
+		if member_info:
+			load_dotenv()
+			secret_key = os.getenv('key')
+			# TODO:發Token
+			payload = {
+				'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7),
+				'member_id': member_info[0],
+				'member_name': member_info[1],
+				'member_email': member_info[2]
+			}
+		else:
+			return jsonify({'error': True, 'message': 'Email或密碼輸入錯誤'}), 400
 
 	
 app.run(host="0.0.0.0", port=3000)
