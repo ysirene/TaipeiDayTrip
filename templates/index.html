@@ -12,9 +12,7 @@
                 <a href="/"><div class="navigation__title">台北一日遊</div></a>
                 <div class="navigation__menu">
                     <button class="navigation__button">預定行程</button>
-                    <!-- TODO:按鈕的切換 -->
-                    <button class="navigation__button" onclick="toggleSigninSignup()">登入/註冊</button>
-                    <button class="navigation__button" onclick="Signout()">登出系統</button>
+                    <button class="navigation__button" id="member_btn" onclick="toggleSigninSignup()">登入/註冊</button>
                 </div>
             </div>
         </div>
@@ -66,7 +64,6 @@
                     <span class="member__text--pointer" onclick="showSigninPage(); return false">點此登入</span>
                 </div>
             </div>
-
         </div>
         <script>
             let nextPage = 0;
@@ -172,7 +169,27 @@
             });
             getAttractionsData(nextPage, keyword);
 
-            // 清空登入/註冊頁面的提示訊息
+            // 驗證登入狀態
+            (function authenticateUser(){
+                if(localStorage.getItem('token')){
+                    let token = localStorage.getItem('token');
+                    fetch('/api/user/auth',{
+                        method: 'GET',
+                        headers:{
+                            'authorization': `Bearer ${token}`
+                        }
+                    }).then(function(response){
+                        return response.json();
+                    }).then(function(data){
+                        if(data['data'] != null){
+                            let memberBtnElem = document.querySelector('#member_btn');
+                            memberBtnElem.textContent = '登出系統';
+                            memberBtnElem.setAttribute('onclick', 'signout()');
+                        };
+                    })
+                };
+            })();
+            // 清空登入/註冊頁面的回饋訊息
             function clearReminder(){
                 let successMessageElem = document.querySelector('.member__text--success');
                 let errorMessageElem = document.querySelectorAll('.member__text--error');
@@ -196,7 +213,6 @@
                 let memberContainerElem = document.querySelector('.member__container');
                 memberBackgroundElem.classList.replace('elem--hide', 'elem--block');
                 memberContainerElem.classList.replace('elem--hide', 'elem--block');
-                clearReminder();
                 showSigninPage();
             };
             // 關閉登入/註冊頁面
@@ -232,33 +248,41 @@
             };
             // 註冊帳號
             function signup(){
+                clearReminder();
                 let signupFormData = new FormData(document.querySelector('#signup_form'));
-                let userData = {
-                    'name': signupFormData.get('name'),
-                    'email': signupFormData.get('email'),
-                    'password':signupFormData.get('password')
-                };
-                fetch('/api/user',{
-                    method: 'POST',
-                    headers:{
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(userData)
-                }).then(function(response){
-                    return response.json();
-                }).then(function(data){
-                    clearReminder();
-                    if(data.error){
-                        let errorMessageElem = document.querySelectorAll('.member__text--error')[1];
-                        errorMessageElem.textContent = data['message'];
-                    }else if(data.ok){
-                        let successMessageElem = document.querySelector('.member__text--success');
-                        successMessageElem.textContent = '註冊成功，請登入系統';
+                let emailRule = /^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/;
+                if(signupFormData.get('email').search(emailRule) == -1){
+                    let errorMessageElem = document.querySelectorAll('.member__text--error')[1]
+                    errorMessageElem.textContent = 'Email格式錯誤'
+                }else{
+                    let userData = {
+                        'name': signupFormData.get('name'),
+                        'email': signupFormData.get('email'),
+                        'password':signupFormData.get('password')
                     };
-                })
-            }
+                    fetch('/api/user',{
+                        method: 'POST',
+                        headers:{
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(userData)
+                    }).then(function(response){
+                        return response.json();
+                    }).then(function(data){
+                        clearReminder();
+                        if(data.error){
+                            let errorMessageElem = document.querySelectorAll('.member__text--error')[1];
+                            errorMessageElem.textContent = data['message'];
+                        }else if(data.ok){
+                            let successMessageElem = document.querySelector('.member__text--success');
+                            successMessageElem.textContent = '註冊成功，請登入系統';
+                        };
+                    })
+                };
+            };
             // 登入系統
             function signin(){
+                clearReminder();
                 let signinFormData = new FormData(document.querySelector('#signin_form'));
                 let userData = {
                     'email':signinFormData.get('email'),
@@ -277,13 +301,17 @@
                     if(data.error){
                         let errorMessageElem = document.querySelectorAll('.member__text--error')[0];
                         errorMessageElem.textContent = data['message'];
-                    }
+                    }else{
+                        localStorage.setItem('token', data.token);
+                        location.reload();
+                    };
                 });
             };
             // 登出系統
             function signout(){
-                // TODO:清Token
-            }
+                localStorage.clear('token');
+                location.reload();
+            };
         </script>
     </body>
 </html>

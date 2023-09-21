@@ -147,7 +147,14 @@ def signin():
 		# TODO: 驗證會員
 		load_dotenv()
 		secret_key = os.getenv('key')
-
+		auth_header = request.headers.get('Authorization')
+		if auth_header:
+			try:
+				token = auth_header.split(' ')[1]
+				payload = jwt.decode(token, secret_key, algorithms=['HS256'])
+				return jsonify({'data':payload})
+			except:
+				return jsonify({'data': None})
 	elif request.method == 'PUT':
 		data = request.get_json()
 		email = data.get('email')
@@ -172,6 +179,8 @@ def signin():
 				'member_name': member_info[1],
 				'member_email': member_info[2]
 			}
+			token = jwt.encode(payload, secret_key, algorithm="HS256")
+			return jsonify({'token': token})
 		else:
 			return jsonify({'error': True, 'message': 'Email或密碼輸入錯誤'}), 400
 
