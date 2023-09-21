@@ -39,10 +39,10 @@
             <div class="member__title"></div>
             <div class="member__close_icon" onclick="closeSigninSignup()"></div>
             <div id="signin_item" class="elem--hide">
-                <form id="signin_form">
+                <form id="signin_form" onsubmit="signin(event)">
                     <input class="member__input" type="text" name="email" placeholder="輸入電子信箱" required>
                     <input class="member__input" type="password" name="password" placeholder="輸入密碼" required>
-                    <input class="member__submit" type="button" value="登入帳戶" onclick="signin()">
+                    <input class="member__submit" type="submit" value="登入帳戶">
                 </form>
                 <div class="member__text--normal" id="signin_text">
                     <div class="member__text--error"></div>
@@ -51,11 +51,11 @@
                 </div>
             </div>
             <div id="signup_item" class="elem--hide">
-                <form id="signup_form" method="post" action="/api/user">
+                <form id="signup_form" onsubmit="signup(event)">
                     <input class="member__input" type="text" name="name" placeholder="輸入姓名" required>
                     <input class="member__input" type="text" name="email" placeholder="輸入電子信箱" required>
                     <input class="member__input" type="password" name="password" placeholder="輸入密碼" required>
-                    <input class="member__submit" type="button" value="註冊新帳戶"  onclick="signup()">
+                    <input class="member__submit" type="submit" value="註冊新帳戶">
                 </form>
                 <div class="member__text--normal" id="signin_text">
                     <div class="member__text--success"></div>
@@ -247,13 +247,14 @@
                 clearSigninValue();
             };
             // 註冊帳號
-            function signup(){
+            function signup(event){
+                event.preventDefault();
                 clearReminder();
                 let signupFormData = new FormData(document.querySelector('#signup_form'));
                 let emailRule = /^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/;
                 if(signupFormData.get('email').search(emailRule) == -1){
-                    let errorMessageElem = document.querySelectorAll('.member__text--error')[1]
-                    errorMessageElem.textContent = 'Email格式錯誤'
+                    let errorMessageElem = document.querySelectorAll('.member__text--error')[1];
+                    errorMessageElem.textContent = 'Email格式錯誤';
                 }else{
                     let userData = {
                         'name': signupFormData.get('name'),
@@ -281,7 +282,8 @@
                 };
             };
             // 登入系統
-            function signin(){
+            function signin(event){
+                event.preventDefault(),
                 clearReminder();
                 let signinFormData = new FormData(document.querySelector('#signin_form'));
                 let userData = {

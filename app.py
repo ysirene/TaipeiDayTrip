@@ -144,7 +144,6 @@ def signup():
 @app.route(('/api/user/auth'), methods = ['GET', 'PUT'])
 def signin():
 	if request.method == 'GET':
-		# TODO: 驗證會員
 		load_dotenv()
 		secret_key = os.getenv('key')
 		auth_header = request.headers.get('Authorization')
@@ -172,7 +171,6 @@ def signin():
 		if member_info:
 			load_dotenv()
 			secret_key = os.getenv('key')
-			# TODO:發Token
 			payload = {
 				'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7),
 				'member_id': member_info[0],
