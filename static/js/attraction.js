@@ -1,0 +1,82 @@
+const attraction_id = window.location.pathname.split('/')[2];
+let totalImages = 0
+fetch(`/api/attraction/${attraction_id}`).then(function(response){
+    return response.json();
+}).then(function(data){
+    if(data.error){
+        window.location.href = '/';
+    }else{
+        let attractionNameElem = document.querySelector('.profile__info_name');
+        let attractionCatMrtElem = document.querySelector('.profile__info_cat_mrt');
+        let attractionDescriptionElem = document.querySelector('#description');
+        let attractionAddressElem = document.querySelector('#address');
+        let attractionTransportElem = document.querySelector('#transport');
+        attractionNameElem.textContent = data['data']['name'];
+        attractionCatMrtElem.textContent = data['data']['category'] + ' at ' + data['data']['mrt'];
+        attractionDescriptionElem.textContent = data['data']['description'];
+        attractionAddressElem.textContent = data['data']['address'];
+        attractionTransportElem.textContent = data['data']['transport'];
+        // 處理照片輪播
+        let imagesArr = data['data']['images'];
+        let slideContainerElem = document.querySelector('.profile__slide_show');
+        totalImages = imagesArr.length;
+        for(let i=0;i<imagesArr.length;i++){
+            let image = document.createElement('img');
+            image.setAttribute('src', imagesArr[i]);
+            if(i==0){
+                image.className = 'fade_in';
+            }else{
+                image.className = 'hide_img';
+            };
+            slideContainerElem.appendChild(image);
+        };
+        for(let i=0;i<imagesArr.length;i++){
+            let slideChoiceElem = document.querySelector('.profile__slide_choice');
+            let choiceSpan = document.createElement('span')
+            choiceSpan.setAttribute('onclick',`changeSlide(${i})`);
+            if(i == 0){
+                choiceSpan.style.backgroundImage = 'url(../static/image/img_picker_b.png)';
+                choiceSpan.id = 'choice_picked';
+            };
+            slideChoiceElem.appendChild(choiceSpan);
+        };
+    };
+});
+let currentSlideIdx = 0;
+function changeSlide(num){
+    let fadeOutSlide = document.querySelector('.fade_in');
+    let pastChoiceElem = document.querySelector('#choice_picked');
+    let choiceElem = document.querySelector('.profile__slide_choice').children[num];
+    let imgElem = document.getElementsByTagName('img');
+    fadeOutSlide.className = 'fade_out';
+    imgElem[num].className = 'fade_in';
+    pastChoiceElem.style.backgroundImage = 'url(../static/image/img_picker_w.png)';
+    pastChoiceElem.removeAttribute('id');
+    choiceElem.style.backgroundImage = 'url(../static/image/img_picker_b.png)';
+    choiceElem.id = 'choice_picked';
+}
+function prevSlide(){
+    currentSlideIdx = (currentSlideIdx - 1 + totalImages) % totalImages;
+    changeSlide(currentSlideIdx);
+};
+function nextSlide(){
+    currentSlideIdx = (currentSlideIdx + 1) % totalImages;
+    changeSlide(currentSlideIdx);
+};
+// 最早的預約日期是今天
+let today = new Date().toISOString().split('T')[0];
+let bookingDateElem = document.querySelector('.booking__date');
+bookingDateElem.min = today;
+// 根據時段改變價錢
+let bookingTimeElem = document.querySelectorAll('input[name="booking_time"]');
+let bookingPriceElem = document.querySelector('.booking__price');
+bookingTimeElem.forEach((elem) => {
+    elem.addEventListener('change', function(event){
+        time = event.target.value;
+        if(time == 'forenoon'){
+            bookingPriceElem.textContent = '新台幣 2000 元';
+        }else{
+            bookingPriceElem.textContent = '新台幣 2500 元';
+        };
+    });
+});

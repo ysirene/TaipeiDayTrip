@@ -1,330 +1,60 @@
-<!DOCTYPE html>
-<html>
-    <head>
-        <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <link rel="stylesheet" type="text/css" href="../static/attraction.css">
-        <title>Taipei Trip 台北一日遊</title>
-    </head>
-    <body>
-        <div class="navigation__background">
-            <div class="navigation">
-                <a href="/"><div class="navigation__title">台北一日遊</div></a>
-                <div class="navigation__menu">
-                    <button class="navigation__button">預定行程</button>
-                    <button class="navigation__button" id="member_btn" onclick="toggleSigninSignup()">登入/註冊</button>
+{% extends "base.html" %}
+
+{% block css %}
+<link rel="stylesheet" type="text/css" href="../static/css/attraction.css">
+{% endblock %}
+
+{% block main %}
+<div class="profile">
+    <div class="profile__slide_show">
+        <div class="profile__slide_choice"></div>
+        <button class="profile__prev_slide_btn" onclick="prevSlide()"></button>
+        <button class="profile__next_slide_btn" onclick="nextSlide()"></button>
+    </div>
+    <div class="profile__info_container">
+        <div class="profile__info_name"></div>
+        <div class="profile__info_cat_mrt"></div>
+        <div class="booking">
+            <div class="booking__title">訂購導覽行程</div>
+            <div class="booking__slogan">以此景點為中心的一日行程，帶您探索城市角落故事</div>
+            <form>
+                <div class="booking__form_object">
+                    <span class="booking__title">選擇日期：</span>
+                    <input type="date" class="booking__date" name="booking_date" required>
+                    <span class="booking__date_icon">
+                        <button type="button"></button>
+                    </span>
                 </div>
-            </div>
+                <div class="booking__form_object">
+                    <span class="booking__title">選擇時間：</span>
+                    <label class="booking__time_item">上半天
+                        <input type="radio" name="booking_time" value="forenoon"checked>
+                        <span class="booking__checkmark"></span>
+                    </label>
+                    <label class="booking__time_item">下半天
+                        <input type="radio" name="booking_time" value="afternoon">
+                        <span class="booking__checkmark"></span>
+                    </label>
+                </div>
+                <div class="booking__form_object">
+                    <span class="booking__title">導覽費用：</span>
+                    <span class="booking__price">新台幣 2000 元</span>                            
+                </div>
+                <div class="booking__form_object">
+                    <input type="submit" value="開始預約行程" class="booking__submit">
+                </div>
+            </form>
         </div>
-        <div class="profile">
-            <div class="profile__slide_show">
-                <div class="profile__slide_choice"></div>
-                <button class="profile__prev_slide_btn" onclick="prevSlide()"></button>
-                <button class="profile__next_slide_btn" onclick="nextSlide()"></button>
-            </div>
-            <div class="profile__info_container">
-                <div class="profile__info_name"></div>
-                <div class="profile__info_cat_mrt"></div>
-                <div class="booking">
-                    <div class="booking__title">訂購導覽行程</div>
-                    <div class="booking__slogan">以此景點為中心的一日行程，帶您探索城市角落故事</div>
-                    <form>
-                        <div class="booking__form_object">
-                            <span class="booking__title">選擇日期：</span>
-                            <input type="date" class="booking__date" name="booking_date" required>
-                            <span class="booking__date_icon">
-                                <button type="button"></button>
-                            </span>
-                        </div>
-                        <div class="booking__form_object">
-                            <span class="booking__title">選擇時間：</span>
-                            <label class="booking__time_item">上半天
-                                <input type="radio" name="booking_time" value="forenoon"checked>
-                                <span class="booking__checkmark"></span>
-                            </label>
-                            <label class="booking__time_item">下半天
-                                <input type="radio" name="booking_time" value="afternoon">
-                                <span class="booking__checkmark"></span>
-                            </label>
-                        </div>
-                        <div class="booking__form_object">
-                            <span class="booking__title">導覽費用：</span>
-                            <span class="booking__price">新台幣 2000 元</span>                            
-                        </div>
-                        <div class="booking__form_object">
-                            <input type="submit" value="開始預約行程" class="booking__submit">
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-        <hr class="separator">
-        <div class="detail__text" id="description"></div>
-        <div class="detail__title">景點地址：</div>
-        <div  class="detail__text" id="address"></div>
-        <div class="detail__title">交通方式：</div>
-        <div  class="detail__text" id="transport"></div>
-        <div class="footer">COPYRIGHT © 2021 台北一日遊</div>
-        <div class="member__background elem--hide"></div>
-        <div class="member__container elem--hide">
-            <div class="member__decorator_bar"></div>
-            <div class="member__title"></div>
-            <div class="member__close_icon" onclick="closeSigninSignup()"></div>
-            <div id="signin_item" class="elem--hide">
-                <form id="signin_form" onsubmit="signin(event)">
-                    <input class="member__input" type="text" name="email" placeholder="輸入電子信箱" required>
-                    <input class="member__input" type="password" name="password" placeholder="輸入密碼" required>
-                    <input class="member__submit" type="submit" value="登入帳戶">
-                </form>
-                <div class="member__text--normal" id="signin_text">
-                    <div class="member__text--error"></div>
-                    <span>還沒有帳戶？</span>
-                    <span class="member__text--pointer" onclick="showSignupPage(); return false">點此註冊</span>
-                </div>
-            </div>
-            <div id="signup_item" class="elem--hide">
-                <form id="signup_form" onsubmit="signup(event)">
-                    <input class="member__input" type="text" name="name" placeholder="輸入姓名" required>
-                    <input class="member__input" type="text" name="email" placeholder="輸入電子信箱" required>
-                    <input class="member__input" type="password" name="password" placeholder="輸入密碼" required>
-                    <input class="member__submit" type="submit" value="註冊新帳戶">
-                </form>
-                <div class="member__text--normal" id="signin_text">
-                    <div class="member__text--success"></div>
-                    <div class="member__text--error"></div>
-                    <span>已經有帳戶了？</span>
-                    <span class="member__text--pointer" onclick="showSigninPage(); return false">點此登入</span>
-                </div>
-            </div>
-        </div>
-        <script>
-            const attraction_id = window.location.pathname.split('/')[2];
-            let totalImages = 0
-            fetch(`/api/attraction/${attraction_id}`).then(function(response){
-                return response.json();
-            }).then(function(data){
-                if(data.error){
-                    window.location.href = '/';
-                }else{
-                    let attractionNameElem = document.querySelector('.profile__info_name');
-                    let attractionCatMrtElem = document.querySelector('.profile__info_cat_mrt');
-                    let attractionDescriptionElem = document.querySelector('#description');
-                    let attractionAddressElem = document.querySelector('#address');
-                    let attractionTransportElem = document.querySelector('#transport');
-                    attractionNameElem.textContent = data['data']['name'];
-                    attractionCatMrtElem.textContent = data['data']['category'] + ' at ' + data['data']['mrt'];
-                    attractionDescriptionElem.textContent = data['data']['description'];
-                    attractionAddressElem.textContent = data['data']['address'];
-                    attractionTransportElem.textContent = data['data']['transport'];
-                    // 處理照片輪播
-                    let imagesArr = data['data']['images'];
-                    let slideContainerElem = document.querySelector('.profile__slide_show');
-                    totalImages = imagesArr.length;
-                    for(let i=0;i<imagesArr.length;i++){
-                        let image = document.createElement('img');
-                        image.setAttribute('src', imagesArr[i]);
-                        if(i==0){
-                            image.className = 'fade_in';
-                        }else{
-                            image.className = 'hide_img';
-                        };
-                        slideContainerElem.appendChild(image);
-                    };
-                    for(let i=0;i<imagesArr.length;i++){
-                        let slideChoiceElem = document.querySelector('.profile__slide_choice');
-                        let choiceSpan = document.createElement('span')
-                        choiceSpan.setAttribute('onclick',`changeSlide(${i})`);
-                        if(i == 0){
-                            choiceSpan.style.backgroundImage = 'url(../static/img_picker_b.png)';
-                            choiceSpan.id = 'choice_picked';
-                        };
-                        slideChoiceElem.appendChild(choiceSpan);
-                    };
-                };
-            });
-            let currentSlideIdx = 0;
-            function changeSlide(num){
-                let fadeOutSlide = document.querySelector('.fade_in');
-                let pastChoiceElem = document.querySelector('#choice_picked');
-                let choiceElem = document.querySelector('.profile__slide_choice').children[num];
-                let imgElem = document.getElementsByTagName('img');
-                fadeOutSlide.className = 'fade_out';
-                imgElem[num].className = 'fade_in';
-                pastChoiceElem.style.backgroundImage = 'url(../static/img_picker_w.png)';
-                pastChoiceElem.removeAttribute('id');
-                choiceElem.style.backgroundImage = 'url(../static/img_picker_b.png)';
-                choiceElem.id = 'choice_picked';
-            }
-            function prevSlide(){
-                currentSlideIdx = (currentSlideIdx - 1 + totalImages) % totalImages;
-                changeSlide(currentSlideIdx);
-            };
-            function nextSlide(){
-                currentSlideIdx = (currentSlideIdx + 1) % totalImages;
-                changeSlide(currentSlideIdx);
-            };
-            // 最早的預約日期是今天
-            let today = new Date().toISOString().split('T')[0];
-            let bookingDateElem = document.querySelector('.booking__date');
-            bookingDateElem.min = today;
-            // 根據時段改變價錢
-            let bookingTimeElem = document.querySelectorAll('input[name="booking_time"]');
-            let bookingPriceElem = document.querySelector('.booking__price');
-            bookingTimeElem.forEach((elem) => {
-                elem.addEventListener('change', function(event){
-                    time = event.target.value;
-                    if(time == 'forenoon'){
-                        bookingPriceElem.textContent = '新台幣 2000 元';
-                    }else{
-                        bookingPriceElem.textContent = '新台幣 2500 元';
-                    };
-                });
-            });
-            // 驗證登入狀態
-            (function authenticateUser(){
-                if(localStorage.getItem('token')){
-                    let token = localStorage.getItem('token');
-                    fetch('/api/user/auth',{
-                        method: 'GET',
-                        headers:{
-                            'authorization': `Bearer ${token}`
-                        }
-                    }).then(function(response){
-                        return response.json();
-                    }).then(function(data){
-                        if(data['data'] != null){
-                            let memberBtnElem = document.querySelector('#member_btn');
-                            memberBtnElem.textContent = '登出系統';
-                            memberBtnElem.setAttribute('onclick', 'signout()');
-                        };
-                    })
-                };
-            })();
-            // 清空登入/註冊頁面的回饋訊息
-            function clearReminder(){
-                let successMessageElem = document.querySelector('.member__text--success');
-                let errorMessageElem = document.querySelectorAll('.member__text--error');
-                successMessageElem.textContent = '';
-                errorMessageElem[0].textContent = '';
-                errorMessageElem[1].textContent = '';
-            };
-            // 清空登入表單的值
-            function clearSigninValue(){
-                let signinValue = document.querySelector('#signin_form');
-                signinValue.reset();
-            };
-            // 清空註冊表單的值
-            function clearSignupValue(){
-                let signupValue = document.querySelector('#signup_form');
-                signupValue.reset();
-            };
-            // 開啟登入/註冊頁面
-            function toggleSigninSignup(){
-                let memberBackgroundElem = document.querySelector('.member__background');
-                let memberContainerElem = document.querySelector('.member__container');
-                memberBackgroundElem.classList.replace('elem--hide', 'elem--block');
-                memberContainerElem.classList.replace('elem--hide', 'elem--block');
-                showSigninPage();
-            };
-            // 關閉登入/註冊頁面
-            function closeSigninSignup(){
-                let memberBackgroundElem = document.querySelector('.member__background');
-                let memberContainerElem = document.querySelector('.member__container');
-                memberBackgroundElem.classList.replace('elem--block', 'elem--hide');
-                memberContainerElem.classList.replace('elem--block', 'elem--hide');
-                clearSigninValue();
-                clearSignupValue();
-            };
-            // 切換到登入頁面
-            function showSigninPage(){
-                let memberTitleElem = document.querySelector('.member__title');
-                let signinItemElem = document.querySelector('#signin_item');
-                let signupItemElem = document.querySelector('#signup_item');
-                memberTitleElem.textContent = '登入會員帳號';
-                signinItemElem.className = 'elem--block';
-                signupItemElem.className = 'elem--hide';
-                clearReminder();
-                clearSignupValue();
-            };
-            // 切換到註冊頁面
-            function showSignupPage(){
-                let memberTitleElem = document.querySelector('.member__title');
-                let signinItemElem = document.querySelector('#signin_item');
-                let signupItemElem = document.querySelector('#signup_item');
-                memberTitleElem.textContent = '註冊會員帳號';
-                signinItemElem.className = 'elem--hide';
-                signupItemElem.className = 'elem--block';
-                clearReminder();
-                clearSigninValue();
-            };
-            // 註冊帳號
-            function signup(event){
-                event.preventDefault();
-                clearReminder();
-                let signupFormData = new FormData(document.querySelector('#signup_form'));
-                let emailRule = /^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/;
-                if(signupFormData.get('email').search(emailRule) == -1){
-                    let errorMessageElem = document.querySelectorAll('.member__text--error')[1];
-                    errorMessageElem.textContent = 'Email格式錯誤';
-                }else{
-                    let userData = {
-                        'name': signupFormData.get('name'),
-                        'email': signupFormData.get('email'),
-                        'password':signupFormData.get('password')
-                    };
-                    fetch('/api/user',{
-                        method: 'POST',
-                        headers:{
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify(userData)
-                    }).then(function(response){
-                        return response.json();
-                    }).then(function(data){
-                        clearReminder();
-                        if(data.error){
-                            let errorMessageElem = document.querySelectorAll('.member__text--error')[1];
-                            errorMessageElem.textContent = data['message'];
-                        }else if(data.ok){
-                            let successMessageElem = document.querySelector('.member__text--success');
-                            successMessageElem.textContent = '註冊成功，請登入系統';
-                        };
-                    })
-                };
-            };
-            // 登入系統
-            function signin(event){
-                event.preventDefault();
-                clearReminder();
-                let signinFormData = new FormData(document.querySelector('#signin_form'));
-                let userData = {
-                    'email':signinFormData.get('email'),
-                    'password':signinFormData.get('password'),
-                };
-                fetch('/api/user/auth', {
-                    method: 'PUT',
-                    headers:{
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(userData)
-                }).then(function(response){
-                    return response.json();
-                }).then(function(data){
-                    clearReminder();
-                    if(data.error){
-                        let errorMessageElem = document.querySelectorAll('.member__text--error')[0];
-                        errorMessageElem.textContent = data['message'];
-                    }else{
-                        localStorage.setItem('token', data.token);
-                        location.reload();
-                    };
-                });
-            };
-            // 登出系統
-            function signout(){
-                localStorage.clear('token');
-                location.reload();
-            };
-        </script>
-    </body>
-</html>
+    </div>
+</div>
+<hr class="separator">
+<div class="detail__text" id="description"></div>
+<div class="detail__title">景點地址：</div>
+<div  class="detail__text" id="address"></div>
+<div class="detail__title">交通方式：</div>
+<div  class="detail__text" id="transport"></div>
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript" src="../static/js/attraction.js"></script>
+{% endblock %}
