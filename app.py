@@ -104,7 +104,7 @@ def api_attraction_id(attractionId):
 
 # 取得捷運站列表
 @app.route('/api/mrts')
-def mrts():
+def api_mrts():
 	try:
 		conn = connect_to_db()
 	except:
@@ -116,7 +116,7 @@ def mrts():
 	return jsonify({'data': record})
 
 # 註冊會員 POST
-@app.route('/api/user', methods = {'POST'})
+@app.route('/api/user', methods = ['POST'])
 def signup():
 	data = request.get_json()
 	name = data.get('name')
@@ -182,5 +182,70 @@ def signin():
 		else:
 			return jsonify({'error': True, 'message': 'Email或密碼輸入錯誤'}), 400
 
-	
+# 預定行程
+@app.route('/api/booking', methods = ['GET', 'POST', 'DELETE'])
+def api_booking():
+	load_dotenv()
+	secret_key = os.getenv('key')
+	auth_header = request.headers.get('Authorization')
+	try:
+		token = auth_header.split(' ')[1]
+		payload = jwt.decode(token, secret_key, algorithms=['HS256'])
+	except:
+		return jsonify({'error': True, 'message': '會員未登入'}), 403
+	else:
+		member_id = payload['id']
+	try:
+		conn = connect_to_db()
+	except:
+		return jsonify({'error': True, 'message': '無法連線到資料庫'}), 500
+	cursor = conn.cursor()
+	if request.method == 'GET':
+		cursor.execute('SELECT booking.*, sight.name, sight.address, image.url FROM booking INNER JOIN sight ON booking.sight_id=sight.id INNER JOIN image ON booking.sight_id=image.sight_id WHERE booking.member_id=%s ORDER BY image.id ASC LIMIT 1;', (member_id,))
+		record = cursor.fetchone()
+		cursor.close()
+		conn.close()
+		if record:
+			attraction_data = {
+				'id': record[2],
+				'name': record[6],
+				'address': record[7],
+				'image': record[8]
+			}
+			data = {
+				'attraction': attraction_data,
+				'date': record[3],
+				'time': record[4],
+				'price': record[5]
+			}
+			return jsonify({'data': data})
+		else:
+			return jsonify({'data': None})
+	elif request.method == 'POST':
+		data = request.get_json()
+		attraction_id = data.get('attractionId')
+		date = data.get('date')
+		time = data.get('time')
+		price = data.get('price')
+		booking_data = (member_id, attraction_id, date, time, price)
+		success = True
+		try:
+			cursor.execute('INSERT INTO booking(member_id, sight_id, date, time, price) VALUES(%s, %s, %s, %s, %s);', booking_data)
+			conn.commit()
+		except:
+			success = False
+		finally:
+			cursor.close()
+			conn.close()
+		if success:
+			return jsonify({'ok': True})
+		else:
+			return jsonify({'error': True, 'message': '輸入不正確'}), 400
+	elif request.method == 'DELETE':
+		cursor.execute('DELETE FROM booking WHERE member_id=%s', (member_id))
+		conn.commit()
+		cursor.close()
+		conn.close()
+		return jsonify({'ok': True})
+
 app.run(host="0.0.0.0", port=3000)
