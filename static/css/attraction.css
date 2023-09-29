@@ -1,3 +1,6 @@
+body{
+    display: none;
+}
 .navigation__background{
     border:solid 1px #E8E8E8;
 }

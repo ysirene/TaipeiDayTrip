@@ -76,6 +76,9 @@ a:active{text-decoration: none;}
 .elem--block{
     display: block;
 }
+.elem--invisible{
+    visibility: hidden;
+}
 .member__background{
     position: fixed;
     z-index: 600;

@@ -6,6 +6,10 @@ let searchKeywordElem = document.querySelector('.search_bar__box');
 let leftArrowElem = document.querySelector('.list_bar__left_arrow');
 let rightArrowElem = document.querySelector('.list_bar__right_arrow');
 let containerElem = document.querySelector('.container');
+
+// 驗證會員身分
+authenticateUser();
+
 // 捲動顯示下一頁
 const callback = (entries) => {
     if(entries[0].isIntersecting && nextPage != null){
@@ -30,9 +34,9 @@ function searchMrt(btn){
 };
 // 取得捷運列表
 (function getMrtsList(){
-    fetch('/api/mrts').then(function(response){
-        return response.json();
-    }).then(function(data){
+    let src = '/api/mrts';
+    let options = {};
+    ajax(src, options).then((data) => {
         for(let i=0; i<data['data'].length; i++){
             if (data['data'][i] != 'None'){
                 let mrtButton = document.createElement('button');
@@ -42,8 +46,8 @@ function searchMrt(btn){
                 containerElem.appendChild(mrtButton);
             };
         };
-    }).catch(function(error){
-        console.log(error['message']);
+    }).catch((error) => {
+        console.log(error);
     });
 })();
 // 將取得的data渲染到畫面
@@ -75,9 +79,9 @@ function renderAttractions(data){
 };
 // 取得景點DATA後渲染&無限捲動
 function getAttractionsData(page, keyword){
-    fetch(`/api/attractions?page=${encodeURIComponent(page)}&keyword=${encodeURIComponent(keyword)}`).then(function(response){
-        return response.json();
-    }).then(function(data){
+    let src = `/api/attractions?page=${encodeURIComponent(page)}&keyword=${encodeURIComponent(keyword)}`;
+    let options = {};
+    ajax(src, options).then((data) => {
         nextPage = data['nextPage'];
         if(data['data'].length == 0){
             attractionsElem.textContent = '找不到相關的景點';
@@ -85,8 +89,8 @@ function getAttractionsData(page, keyword){
             renderAttractions(data);
             observer.observe(document.querySelector('.attractions').lastChild);
         }
-    }).catch(function(error){
-        console.log(error['message']);
+    }).catch((error) => {
+        console.log(error);
     });
 };
 // 搜尋框按鈕

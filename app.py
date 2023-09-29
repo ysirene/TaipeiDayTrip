@@ -173,9 +173,9 @@ def signin():
 			secret_key = os.getenv('key')
 			payload = {
 				'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7),
-				'member_id': member_info[0],
-				'member_name': member_info[1],
-				'member_email': member_info[2]
+				'id': member_info[0],
+				'name': member_info[1],
+				'email': member_info[2]
 			}
 			token = jwt.encode(payload, secret_key, algorithm="HS256")
 			return jsonify({'token': token})
@@ -230,19 +230,18 @@ def api_booking():
 		booking_data = (member_id, attraction_id, date, time, price)
 		success = True
 		try:
-			cursor.execute('INSERT INTO booking(member_id, sight_id, date, time, price) VALUES(%s, %s, %s, %s, %s);', booking_data)
+			cursor.execute('INSERT INTO booking(member_id, sight_id, date, time, price) VALUES(%s, %s, %s, %s, %s) ON DUPLICATE KEY UPDATE sight_id = VALUES(sight_id), date = VALUES(date), time = VALUES(time), price = VALUES(price);', booking_data)
 			conn.commit()
+			return jsonify({'ok': True})
 		except:
 			success = False
 		finally:
 			cursor.close()
 			conn.close()
-		if success:
-			return jsonify({'ok': True})
-		else:
+		if success == False:
 			return jsonify({'error': True, 'message': '輸入不正確'}), 400
 	elif request.method == 'DELETE':
-		cursor.execute('DELETE FROM booking WHERE member_id=%s', (member_id))
+		cursor.execute('DELETE FROM booking WHERE member_id=%s', (member_id,))
 		conn.commit()
 		cursor.close()
 		conn.close()

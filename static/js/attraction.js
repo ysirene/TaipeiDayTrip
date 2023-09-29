@@ -1,11 +1,17 @@
 const attraction_id = window.location.pathname.split('/')[2];
-let totalImages = 0
+let totalImages = 0;
+
+// 驗證會員身分
+authenticateUser();
+
+// 連線到該景點並取得資料
 fetch(`/api/attraction/${attraction_id}`).then(function(response){
     return response.json();
 }).then(function(data){
     if(data.error){
         window.location.href = '/';
     }else{
+        document.getElementsByTagName('body')[0].style.display = 'block';
         let attractionNameElem = document.querySelector('.profile__info_name');
         let attractionCatMrtElem = document.querySelector('.profile__info_cat_mrt');
         let attractionDescriptionElem = document.querySelector('#description');
@@ -68,7 +74,7 @@ let today = new Date().toISOString().split('T')[0];
 let bookingDateElem = document.querySelector('.booking__date');
 bookingDateElem.min = today;
 // 根據時段改變價錢
-let bookingTimeElem = document.querySelectorAll('input[name="booking_time"]');
+let bookingTimeElem = document.querySelectorAll('input[name="time"]');
 let bookingPriceElem = document.querySelector('.booking__price');
 bookingTimeElem.forEach((elem) => {
     elem.addEventListener('change', function(event){
@@ -80,3 +86,38 @@ bookingTimeElem.forEach((elem) => {
         };
     });
 });
+// 將預定行程加入購物車
+function addItemToCart(event){
+    event.preventDefault();
+    if(signinStatus === false){
+        toggleSigninSignup();
+    }
+    else{
+        let bookingFormData = new FormData(document.querySelector('#booking_form'));
+        let price = bookingFormData.get('time') === 'forenoon'? 2000: 2500;
+        let bookingData = {
+            'attractionId': attraction_id,
+            'date': bookingFormData.get('date'),
+            'time': bookingFormData.get('time'),
+            'price': price
+        };
+        let token = localStorage.getItem('token');
+        let src = '/api/booking';
+        let options = {
+            method: 'POST',
+            headers:{
+                'authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(bookingData)
+        }
+        ajax(src, options).then((data) => {
+            if (data.ok){
+                window.location.href = '/booking';
+            }else{
+                console.log(data.error);
+                alert('輸入不正確，請再試一次');
+            };
+        });
+    };
+};

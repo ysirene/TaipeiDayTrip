@@ -17,10 +17,10 @@
         <div class="booking">
             <div class="booking__title">訂購導覽行程</div>
             <div class="booking__slogan">以此景點為中心的一日行程，帶您探索城市角落故事</div>
-            <form>
+            <form id="booking_form" onsubmit="addItemToCart(event)">
                 <div class="booking__form_object">
                     <span class="booking__title">選擇日期：</span>
-                    <input type="date" class="booking__date" name="booking_date" required>
+                    <input type="date" class="booking__date" name="date" required>
                     <span class="booking__date_icon">
                         <button type="button"></button>
                     </span>
@@ -28,11 +28,11 @@
                 <div class="booking__form_object">
                     <span class="booking__title">選擇時間：</span>
                     <label class="booking__time_item">上半天
-                        <input type="radio" name="booking_time" value="forenoon"checked>
+                        <input type="radio" name="time" value="forenoon" checked>
                         <span class="booking__checkmark"></span>
                     </label>
                     <label class="booking__time_item">下半天
-                        <input type="radio" name="booking_time" value="afternoon">
+                        <input type="radio" name="time" value="afternoon">
                         <span class="booking__checkmark"></span>
                     </label>
                 </div>

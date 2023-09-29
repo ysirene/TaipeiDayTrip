@@ -5,53 +5,61 @@
 {% endblock %}
 
 {% block main %}
-<div class="greeting">您好，Yakko，待預定的行程如下：</div>
-<div class="attraction__container">
-    <div class="attraction__image">
-        <img src="../static/image/test.jpg">
+<div class="greeting">您好，<span id="member_name"></span>，待預定的行程如下：</div>
+<section class="elem--hide" id="booking_info">
+    <div class="attraction__container">
+        <div class="attraction__image">
+            <img id="attraction_img">
+        </div>
+        <div class="attraction__text_container">
+            <div class="attraction__del_icon" onclick="delBookingItem()"></div>
+            <div class="attraction__title">台北一日遊：<span id="attraction_name"></span></div>
+            <div class="attraction__subtitle">日期：<span class="attraction__context" id="booking_date"></span></div>
+            <div class="attraction__subtitle">時間：<span class="attraction__context" id="booking_time"></span></div>
+            <div class="attraction__subtitle">費用：<span class="attraction__context">新台幣 <span id="booking_price"></span> 元</span></div>
+            <div class="attraction__subtitle">地點：<span class="attraction__context" id="attraction_address">臺北市 大安區忠孝東路4段</span></div>
+        </div>
     </div>
-    <div class="attraction__text_container">
-        <div class="attraction__del_icon"></div>
-        <div class="attraction__title">台北一日遊：平安鐘</div>
-        <div class="attraction__subtitle">日期：<span class="attraction__context">2021-04-23</span></div>
-        <div class="attraction__subtitle">時間：<span class="attraction__context">早上9點到下午4點</span></div>
-        <div class="attraction__subtitle">費用：<span class="attraction__context">新台幣 2000 元</span></div>
-        <div class="attraction__subtitle">地點：<span class="attraction__context">臺北市 大安區忠孝東路4段</span></div>
+    <hr class="separator">
+    <div class="form__container">
+        <form onsubmit="confirmBooking(event)">
+            <div class="form__title">您的聯絡資訊</div>
+            <div class="form__item">
+                <label class="form__subtitle">聯絡姓名：<input class="form__input" id="member_name" type="text" required></label>
+            </div>
+            <div class="form__item">
+                <label class="form__subtitle">聯絡信箱：<input class="form__input" id="member_email" type="text" required></label>
+            </div>
+            <div class="form__item">
+                <label class="form__subtitle">手機號碼：<input class="form__input" type="tel" pattern="09[0-9]{8}" required></label>
+            </div>
+            <div class="notice">請保持手機暢通，準時到達，導覽人員將用手機與您聯繫，務必留下正確的聯絡方式。</div>
+            <hr class="separator">
+            <div class="form__title">信用卡付款資訊</div>
+            <div class="form__item">
+                <label class="form__subtitle">卡片號碼：<input class="form__input" type="tel" pattern="[0-9\s]{13,19}" maxlength="19" placeholder="**** **** **** ****" required></label>
+            </div>
+            <div class="form__item">
+                <label class="form__subtitle">過期時間：<input class="form__input" placeholder="MM / YY" required></label>
+            </div>
+            <div class="form__item">
+                <label class="form__subtitle">驗證密碼：<input type="tel" class="form__input" placeholder="CCV" required></label>
+            </div>
+            <hr class="separator">
+            <div class="form__confirm_container">
+                <div class="form__amount">總價：新台幣 <span id="amount"></span> 元</div>
+                <input class="form__submit" type="submit" value="確認訂購並付款">
+            </div>
+        </form>
     </div>
-</div>
-<hr class="separator">
-<div class="form__container">
-    <form onsubmit="confirmBooking(event)">
-        <div class="form__title">您的聯絡資訊</div>
-        <div class="form__item">
-            <label class="form__subtitle">聯絡姓名：<input class="form__input" type="text" value="Yakko" required></label>
-        </div>
-        <div class="form__item">
-            <label class="form__subtitle">聯絡信箱：<input class="form__input" type="text" value="wehelp@pada-x.com" required></label>
-        </div>
-        <div class="form__item">
-            <label class="form__subtitle">手機號碼：<input class="form__input" type="tel" pattern="09[0-9]{8}" required></label>
-        </div>
-        <div class="notice">請保持手機暢通，準時到達，導覽人員將用手機與您聯繫，務必留下正確的聯絡方式。</div>
-        <hr class="separator">
-        <div class="form__title">信用卡付款資訊</div>
-        <div class="form__item">
-            <label class="form__subtitle">卡片號碼：<input class="form__input" type="tel" pattern="[0-9\s]{13,19}" maxlength="19" placeholder="**** **** **** ****" required></label>
-        </div>
-        <div class="form__item">
-            <label class="form__subtitle">過期時間：<input class="form__input" placeholder="MM / YY" required></label>
-        </div>
-        <div class="form__item">
-            <label class="form__subtitle">驗證密碼：<input type="tel" class="form__input" placeholder="CCV" required></label>
-        </div>
-        <hr class="separator">
-        <div class="form__confirm_container">
-            <div class="form__amount">總價：新台幣 2000 元</div>
-            <input class="form__submit" type="submit" value="確認訂購並付款">
-        </div>
-    </form>
-</div>
+</section>
+<section class="elem--hide" id="booking_info--none">
+    <div class="attraction__container">
+        <span class="none__text">目前沒有任何待預訂的行程</span>
+    </div>
+</section>
 {% endblock %}
 
 {% block script %}
+<script type="text/javascript" src="../static/js/booking.js"></script>
 {% endblock %}

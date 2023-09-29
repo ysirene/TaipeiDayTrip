@@ -1,23 +1,43 @@
+function ajax(src, options){
+    return new Promise(function(resolve, reject){
+        fetch(src, options).then((response) => {
+            return response.json();
+        }).then((data) => {
+            resolve(data);
+        }).catch((error) => {
+            reject(error);
+        });
+    });
+};
+
+let signinStatus = false
+
 // 驗證登入狀態
-(function authenticateUser(){
+function authenticateUser(){
+    let memberBtnElem = document.querySelector('#member_btn');
     if(localStorage.getItem('token')){
         let token = localStorage.getItem('token');
-        fetch('/api/user/auth',{
+        let src = '/api/user/auth';
+        let options = {
             method: 'GET',
             headers:{
                 'authorization': `Bearer ${token}`
             }
-        }).then(function(response){
-            return response.json();
-        }).then(function(data){
+        };
+        ajax(src, options).then((data) => {
             if(data['data'] != null){
-                let memberBtnElem = document.querySelector('#member_btn');
                 memberBtnElem.textContent = '登出系統';
                 memberBtnElem.setAttribute('onclick', 'signout()');
+                signinStatus = true
             };
-        })
+            memberBtnElem.classList.remove('elem--invisible');
+        }).catch((error) => {
+            console.log(error);
+        });
+    }else{
+        memberBtnElem.classList.remove('elem--invisible');
     };
-})();
+};
 // 清空登入/註冊頁面的回饋訊息
 function clearReminder(){
     let successMessageElem = document.querySelector('.member__text--success');
@@ -90,15 +110,15 @@ function signup(event){
             'email': signupFormData.get('email'),
             'password':signupFormData.get('password')
         };
-        fetch('/api/user',{
+        let src = '/api/user';
+        let options = {
             method: 'POST',
             headers:{
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(userData)
-        }).then(function(response){
-            return response.json();
-        }).then(function(data){
+        };
+        ajax(src, options).then((data) => {
             clearReminder();
             if(data.error){
                 let errorMessageElem = document.querySelectorAll('.member__text--error')[1];
@@ -107,27 +127,29 @@ function signup(event){
                 let successMessageElem = document.querySelector('.member__text--success');
                 successMessageElem.textContent = '註冊成功，請登入系統';
             };
-        })
+        }).catch((error) => {
+            console.log(error);
+        });
     };
 };
 // 登入系統
 function signin(event){
-    event.preventDefault(),
+    event.preventDefault();
     clearReminder();
     let signinFormData = new FormData(document.querySelector('#signin_form'));
     let userData = {
         'email':signinFormData.get('email'),
         'password':signinFormData.get('password'),
     };
-    fetch('/api/user/auth', {
+    let src = '/api/user/auth';
+    let options = {
         method: 'PUT',
         headers:{
             'Content-Type': 'application/json'
         },
         body: JSON.stringify(userData)
-    }).then(function(response){
-        return response.json();
-    }).then(function(data){
+    };
+    ajax(src, options).then((data) => {
         clearReminder();
         if(data.error){
             let errorMessageElem = document.querySelectorAll('.member__text--error')[0];
@@ -136,10 +158,20 @@ function signin(event){
             localStorage.setItem('token', data.token);
             location.reload();
         };
+    }).catch((error) => {
+        console.log(error);
     });
 };
 // 登出系統
 function signout(){
     localStorage.clear('token');
     location.reload();
+};
+// 預定行程按鈕
+function redirectToBookingPage(){
+    if(signinStatus === true){
+        window.location.href = '/booking';
+    }else{
+        toggleSigninSignup();
+    }
 };
