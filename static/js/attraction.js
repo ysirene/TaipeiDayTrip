@@ -105,18 +105,21 @@ function addItemToCart(event){
         let src = '/api/booking';
         let options = {
             method: 'POST',
-            headers:{
+            headers: {
                 'authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(bookingData)
-        }
+        };
+        let alertErrorMsg = {
+            '會員未登入': '請先登入會員',
+            '無法連線到資料庫': '系統忙碌中，請稍後再試'
+        };
         ajax(src, options).then((data) => {
-            if (data.ok){
+            if(data.ok){
                 window.location.href = '/booking';
             }else{
-                console.log(data.error);
-                alert('輸入不正確，請再試一次');
+                alert(alertErrorMsg[data['message']]);
             };
         });
     };

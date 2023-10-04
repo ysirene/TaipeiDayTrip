@@ -83,6 +83,8 @@ body{
     font-weight: 700;
 }
 .form__item{
+    display: flex;
+    align-items: center;
     margin: 0 auto;
     padding-bottom: 15px;
     width: 980px;
@@ -128,6 +130,9 @@ body{
     font-weight: 400;
     line-height: 16px;
 }
+.form__submit:disabled{
+    background-color: #8f8f8f;
+}
 .none__text{
     display: inline-block;
     height: 24px;
@@ -136,6 +141,14 @@ body{
     font-weight: 500;
     line-height: 24px;
 }
+.tpfield{
+    height: 18px;
+    width: 178px;
+    padding: 10px;
+    border: 1px solid #E8E8E8;
+    border-radius: 5px;
+}
+
 @media(max-width: 1200px){
     .separator{
         width: calc(100% - 20px);
