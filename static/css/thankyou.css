@@ -1,0 +1,23 @@
+.navigation__background{
+    border:solid 1px #E8E8E8;
+}
+.title{
+    width: calc(100% - 20px);
+    margin: 0 auto;
+    padding-top: 46px;
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 30px;
+    color: #666;
+    text-align: center;
+}
+.text{
+    width: calc(100% - 20px);
+    margin: 30px auto;
+    text-align: center;
+    color: #666;
+    font-weight: 500;
+}
+.footer{
+    margin-top: 80px;
+}

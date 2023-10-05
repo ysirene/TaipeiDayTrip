@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block css %}
+<link rel="stylesheet" type="text/css" href="../static/css/thankyou.css">
+{% endblock %}
+
+{% block main %}
+<div class="title">行程預定成功<br>您的訂單編號如下</div>
+<div class="text" id="order_id"></div>
+<div class="text">請記住此編號，或到會員中心查詢歷史訂單</div>
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript" src="../static/js/thankyou.js"></script>
+{% endblock %}

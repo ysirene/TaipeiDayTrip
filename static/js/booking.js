@@ -169,20 +169,36 @@ TPDirect.card.onUpdate(function (update) {
     }
 });
 
+function changeSubmitBtnToLoadingType(){
+    let submitBtn = document.querySelector('.form__submit');
+    let loadingBtn = document.querySelector('.form__submit--loading');
+    submitBtn.classList.replace('elem--block', 'elem--hide');
+    loadingBtn.classList.replace('elem--hide', 'elem--block');
+};
+
+function changeSubmitBtnToDefaultType(){
+    let submitBtn = document.querySelector('.form__submit');
+    let loadingBtn = document.querySelector('.form__submit--loading');
+    submitBtn.classList.replace('elem--hide', 'elem--block');
+    loadingBtn.classList.replace('elem--block', 'elem--hide');
+}
+
 // 確認訂購並付款
 function confirmBooking(event) {
-    event.preventDefault()
+    event.preventDefault();
+    changeSubmitBtnToLoadingType();
     // 取得 TapPay Fields 的 status
     const tappayStatus = TPDirect.card.getTappayFieldsStatus();
     // 確認是否可以 getPrime
     if (tappayStatus.canGetPrime === false) {
         alert('信用卡資訊填寫錯誤，請檢查後再試一次');
+        changeSubmitBtnToDefaultType();
         return;
     };
-    // Get prime
     TPDirect.card.getPrime((result) => {
         if (result.status !== 0) {
             alert('付款失敗，請確認信用卡資訊後再試一次');
+            changeSubmitBtnToDefaultType();
             console.log(result.status);
             return;
         };
@@ -209,17 +225,23 @@ function confirmBooking(event) {
             body: JSON.stringify(orderData)
         };
         let alertErrorMsg = {
-            '會員未登入': '請先登入會員',
-            '無法連線到資料庫': '系統忙碌中，請稍後再試'
-        }
+            'not logged in': '請先登入會員',
+            'cannot connect to database': '系統忙碌中，請稍後再試',
+            'Incorrect order information': '訂單資訊有誤，請檢查後再試'
+        };
         ajax(src, options).then((data) => {
-            if(data.ok){
-                // 成功付款，導向感謝頁面(?
-            }else{
+            if(data.error){
                 alert(alertErrorMsg[data['message']]);
+                changeSubmitBtnToDefaultType();
+            }else{
+                if(data['data']['payment']['status'] === 0){
+                    let orderNumber = data['data']['number'];
+                    window.location.href = `/thankyou?number=${orderNumber}`;
+                }else{
+                    alert('訂單編號 ' + data['data']['number'] + ' 付款失敗。錯誤代碼：' + data['data']['payment']['status']);
+                    changeSubmitBtnToDefaultType();
+                }
             }
-        })
-        // send prime to your server, to pay with Pay by Prime API .
-        // Pay By Prime Docs: https://docs.tappaysdk.com/tutorial/zh/back.html#pay-by-prime-api
-    })
+        });
+    });
 }
