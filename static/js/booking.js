@@ -1,3 +1,5 @@
+let bookingData = {};
+
 // 驗證會員身分後取得景點資訊
 (function authenticateUser(){
     if(localStorage.getItem('token')){
@@ -65,6 +67,14 @@ function getBookingInfo(){
             bookingTimeElem.textContent = bookingTime;
             bookingPriceElem.textContent = data['data']['price'];
             amountElem.textContent = data['data']['price'];
+            bookingData = {
+                'price': data['data']['price'],
+                'trip': {
+                    'attraction': data['data']['attraction'],
+                    'date': formattedDate,
+                    'time': data['data']['time']
+                }
+            };
         }else{
             let bookingInfoElem = document.querySelector('#booking_info--none');
             bookingInfoElem.className= '' ;
@@ -97,7 +107,141 @@ function delBookingItem(){
     location.reload();
 };
 
-// 確認訂購並付款
-function confirmBooking(event){
+// 建立TayPay表單
+(function createCreditCardFrom(){
+    TPDirect.setupSDK(137082, 'app_Nv7lGU2I3ImfvkXyR3ogZN50pFRpu6ALDbvas5xbRly0foZJMB9KCiUWNI1o', 'sandbox');
+    let fields = {
+        number: {
+            element: '#card-number',
+            placeholder: '**** **** **** ****',
+            style:{
+                'border-radius': '5px'
+            }
+        },
+        expirationDate: {
+            element: '#card-expiration-date',
+            placeholder: 'MM / YY'
+        },
+        ccv: {
+            element: '#card-ccv',
+            placeholder: 'CCV'
+        }
+    };
+    TPDirect.card.setup({
+        fields: fields,
+        styles: {
+            // Style all elements
+            'input': {
+                'font-size': '16px',
+                'font-weight': '500',
+                'font-family':'"Noto Sans TC", sans-serif'
+            },
+            // style focus state
+            ':focus': {
+                'color': 'black'
+            },
+            // style valid state
+            '.valid': {
+                'color': 'green'
+            },
+            // style invalid state
+            '.invalid': {
+                'color': 'red'
+            }
+        },
+        // 此設定會顯示卡號輸入正確後，會顯示前六後四碼信用卡卡號
+        isMaskCreditCardNumber: true,
+        maskCreditCardNumberRange: {
+            beginIndex: 6,
+            endIndex: 11
+        }
+    });
+})();
 
+// 檢查信用卡資訊是否填寫正確
+TPDirect.card.onUpdate(function (update) {
+    let submitBtn = document.querySelector('.form__submit');
+    if (update.canGetPrime) {
+        // Enable submit Button to get prime.
+        submitBtn.removeAttribute('disabled');
+    } else {
+        submitBtn.setAttribute('disabled', true);
+    }
+});
+
+function changeSubmitBtnToLoadingType(){
+    let submitBtn = document.querySelector('.form__submit');
+    let loadingBtn = document.querySelector('.form__submit--loading');
+    submitBtn.classList.replace('elem--block', 'elem--hide');
+    loadingBtn.classList.replace('elem--hide', 'elem--block');
 };
+
+function changeSubmitBtnToDefaultType(){
+    let submitBtn = document.querySelector('.form__submit');
+    let loadingBtn = document.querySelector('.form__submit--loading');
+    submitBtn.classList.replace('elem--hide', 'elem--block');
+    loadingBtn.classList.replace('elem--block', 'elem--hide');
+}
+
+// 確認訂購並付款
+function confirmBooking(event) {
+    event.preventDefault();
+    changeSubmitBtnToLoadingType();
+    // 取得 TapPay Fields 的 status
+    const tappayStatus = TPDirect.card.getTappayFieldsStatus();
+    // 確認是否可以 getPrime
+    if (tappayStatus.canGetPrime === false) {
+        alert('信用卡資訊填寫錯誤，請檢查後再試一次');
+        changeSubmitBtnToDefaultType();
+        return;
+    };
+    TPDirect.card.getPrime((result) => {
+        if (result.status !== 0) {
+            alert('付款失敗，請確認信用卡資訊後再試一次');
+            changeSubmitBtnToDefaultType();
+            console.log(result.status);
+            return;
+        };
+        let token = localStorage.getItem('token');
+        let prime = result.card.prime;
+        let contactFormData = new FormData(document.querySelector('#contact_form'));
+        let contactData = {
+            'name': contactFormData.get('name'),
+            'email': contactFormData.get('email'),
+            'phone': contactFormData.get('phone'),
+        };
+        let orderData = {
+            'prime': prime,
+            'order': bookingData,
+            'contact': contactData
+        };
+        let src = '/api/orders';
+        let options = {
+            method: 'POST',
+            headers: {
+                'authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(orderData)
+        };
+        let alertErrorMsg = {
+            'not logged in': '請先登入會員',
+            'cannot connect to database': '系統忙碌中，請稍後再試',
+            'Incorrect order information': '訂單資訊有誤，請檢查後再試'
+        };
+        ajax(src, options).then((data) => {
+            if(data.error){
+                alert(alertErrorMsg[data['message']]);
+                changeSubmitBtnToDefaultType();
+            }else{
+                if(data['data']['payment']['status'] === 0){
+                    let orderNumber = data['data']['number'];
+                    window.location.href = `/thankyou?number=${orderNumber}`;
+                }else{
+                    alert('訂單編號 ' + data['data']['number'] + ' 付款失敗。錯誤代碼：' + data['data']['payment']['status']);
+                    changeSubmitBtnToDefaultType();
+                }
+            }
+        });
+    });
+}

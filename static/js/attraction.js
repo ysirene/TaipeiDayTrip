@@ -5,49 +5,51 @@ let totalImages = 0;
 authenticateUser();
 
 // 連線到該景點並取得資料
-fetch(`/api/attraction/${attraction_id}`).then(function(response){
-    return response.json();
-}).then(function(data){
-    if(data.error){
-        window.location.href = '/';
-    }else{
-        document.getElementsByTagName('body')[0].style.display = 'block';
-        let attractionNameElem = document.querySelector('.profile__info_name');
-        let attractionCatMrtElem = document.querySelector('.profile__info_cat_mrt');
-        let attractionDescriptionElem = document.querySelector('#description');
-        let attractionAddressElem = document.querySelector('#address');
-        let attractionTransportElem = document.querySelector('#transport');
-        attractionNameElem.textContent = data['data']['name'];
-        attractionCatMrtElem.textContent = data['data']['category'] + ' at ' + data['data']['mrt'];
-        attractionDescriptionElem.textContent = data['data']['description'];
-        attractionAddressElem.textContent = data['data']['address'];
-        attractionTransportElem.textContent = data['data']['transport'];
-        // 處理照片輪播
-        let imagesArr = data['data']['images'];
-        let slideContainerElem = document.querySelector('.profile__slide_show');
-        totalImages = imagesArr.length;
-        for(let i=0;i<imagesArr.length;i++){
-            let image = document.createElement('img');
-            image.setAttribute('src', imagesArr[i]);
-            if(i==0){
-                image.className = 'fade_in';
-            }else{
-                image.className = 'hide_img';
+(function getAttractionInfo(){
+    let src = `/api/attraction/${attraction_id}`;
+    let options = {};
+    ajax(src, options).then((data) => {
+        if(data.error){
+            window.location.href = '/';
+        }else{
+            document.getElementsByTagName('body')[0].style.display = 'block';
+            let attractionNameElem = document.querySelector('.profile__info_name');
+            let attractionCatMrtElem = document.querySelector('.profile__info_cat_mrt');
+            let attractionDescriptionElem = document.querySelector('#description');
+            let attractionAddressElem = document.querySelector('#address');
+            let attractionTransportElem = document.querySelector('#transport');
+            attractionNameElem.textContent = data['data']['name'];
+            attractionCatMrtElem.textContent = data['data']['category'] + ' at ' + data['data']['mrt'];
+            attractionDescriptionElem.textContent = data['data']['description'];
+            attractionAddressElem.textContent = data['data']['address'];
+            attractionTransportElem.textContent = data['data']['transport'];
+            // 處理照片輪播
+            let imagesArr = data['data']['images'];
+            let slideContainerElem = document.querySelector('.profile__slide_show');
+            totalImages = imagesArr.length;
+            for(let i=0;i<imagesArr.length;i++){
+                let image = document.createElement('img');
+                image.setAttribute('src', imagesArr[i]);
+                if(i==0){
+                    image.className = 'fade_in';
+                }else{
+                    image.className = 'hide_img';
+                };
+                slideContainerElem.appendChild(image);
             };
-            slideContainerElem.appendChild(image);
-        };
-        for(let i=0;i<imagesArr.length;i++){
-            let slideChoiceElem = document.querySelector('.profile__slide_choice');
-            let choiceSpan = document.createElement('span')
-            choiceSpan.setAttribute('onclick',`changeSlide(${i})`);
-            if(i == 0){
-                choiceSpan.style.backgroundImage = 'url(../static/image/img_picker_b.png)';
-                choiceSpan.id = 'choice_picked';
+            for(let i=0;i<imagesArr.length;i++){
+                let slideChoiceElem = document.querySelector('.profile__slide_choice');
+                let choiceSpan = document.createElement('span')
+                choiceSpan.setAttribute('onclick',`changeSlide(${i})`);
+                if(i == 0){
+                    choiceSpan.style.backgroundImage = 'url(../static/image/img_picker_b.png)';
+                    choiceSpan.id = 'choice_picked';
+                };
+                slideChoiceElem.appendChild(choiceSpan);
             };
-            slideChoiceElem.appendChild(choiceSpan);
         };
-    };
-});
+    });
+})();
 let currentSlideIdx = 0;
 function changeSlide(num){
     let fadeOutSlide = document.querySelector('.fade_in');
@@ -105,18 +107,21 @@ function addItemToCart(event){
         let src = '/api/booking';
         let options = {
             method: 'POST',
-            headers:{
+            headers: {
                 'authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(bookingData)
-        }
+        };
+        let alertErrorMsg = {
+            '會員未登入': '請先登入會員',
+            '無法連線到資料庫': '系統忙碌中，請稍後再試'
+        };
         ajax(src, options).then((data) => {
-            if (data.ok){
+            if(data.ok){
                 window.location.href = '/booking';
             }else{
-                console.log(data.error);
-                alert('輸入不正確，請再試一次');
+                alert(alertErrorMsg[data['message']]);
             };
         });
     };

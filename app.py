@@ -4,6 +4,8 @@ import os
 from dotenv import load_dotenv
 import datetime
 import jwt
+import time
+import requests
 
 app=Flask(__name__)
 app.config["JSON_AS_ASCII"]=False
@@ -145,7 +147,7 @@ def signup():
 def signin():
 	if request.method == 'GET':
 		load_dotenv()
-		secret_key = os.getenv('key')
+		secret_key = os.getenv('secret_key')
 		auth_header = request.headers.get('Authorization')
 		if auth_header:
 			try:
@@ -170,7 +172,7 @@ def signin():
 		conn.close()
 		if member_info:
 			load_dotenv()
-			secret_key = os.getenv('key')
+			secret_key = os.getenv('secret_key')
 			payload = {
 				'exp': datetime.datetime.utcnow() + datetime.timedelta(days=7),
 				'id': member_info[0],
@@ -186,7 +188,7 @@ def signin():
 @app.route('/api/booking', methods = ['GET', 'POST', 'DELETE'])
 def api_booking():
 	load_dotenv()
-	secret_key = os.getenv('key')
+	secret_key = os.getenv('secret_key')
 	auth_header = request.headers.get('Authorization')
 	try:
 		token = auth_header.split(' ')[1]
@@ -246,5 +248,80 @@ def api_booking():
 		cursor.close()
 		conn.close()
 		return jsonify({'ok': True})
+
+def generate_order_id(member_id):
+	time_stamp = str(time.strftime('%Y%m%d%H%M%S', time.localtime(time.time())) + str(time.time()).replace('.', '')[-7:])
+	order_id = str(member_id).zfill(3) + '-' + time_stamp
+	return order_id
+
+def request_payment_for_order(partner_key, merchant_id, prime, order_data):
+	request_headers = {
+		'Content-Type': 'application/json',
+    	'x-api-key': partner_key
+	}
+	request_body = {
+		'prime': prime,
+		'partner_key': partner_key,
+		'merchant_id': merchant_id,
+		'details':'台北一日遊行程',
+		'amount': order_data[8],
+		'order_number': order_data[0],
+		'cardholder': {
+			'phone_number': order_data[4],
+			'name': order_data[2],
+			'email': order_data[3],
+		},
+	}
+	url = 'https://sandbox.tappaysdk.com/tpc/payment/pay-by-prime'
+	r = requests.post(url, headers = request_headers, json = request_body, timeout = 30)
+	return r.json()
+
+# 訂單付款
+@app.route('/api/orders', methods = ['POST', 'GET'])
+def api_order():
+	load_dotenv()
+	secret_key = os.getenv('secret_key')
+	auth_header = request.headers.get('Authorization')
+	try:
+		token = auth_header.split(' ')[1]
+		payload = jwt.decode(token, secret_key, algorithms=['HS256'])
+	except:
+		return jsonify({'error': True, 'message': 'not logged in'}), 403
+	else:
+		member_id = payload['id']
+	try:
+		conn = connect_to_db()
+	except:
+		return jsonify({'error': True, 'message': 'cannot connect to database'}), 500
+	data = request.get_json()
+	order_id = generate_order_id(member_id)
+	order_data = (order_id, member_id, data['contact']['name'], data['contact']['email'], data['contact']['phone'] , data['order']['trip']['attraction']['id'], data['order']['trip']['date'], data['order']['trip']['time'], data['order']['price'], False)
+	cursor = conn.cursor()
+	try:
+		cursor.execute('INSERT INTO orders(id, member_id, contact_name, contact_email, contact_phone, sight_id, date, time, price, payment) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)', order_data)
+		conn.commit()
+	except:
+		cursor.close()
+		conn.close()
+		return jsonify({'error': True, 'message': 'Incorrect order information'})
+	prime = data['prime']
+	partner_key = os.getenv('partner_key')
+	merchant_id = os.getenv('merchant_id')
+	tappay_response = request_payment_for_order(partner_key, merchant_id, prime, order_data)
+	if tappay_response['status'] == 0:
+		cursor.execute('UPDATE orders SET payment=1 WHERE id=%s', (order_id,))
+		conn.commit()
+		cursor.execute('DELETE FROM booking WHERE member_id=%s', (member_id,))
+		conn.commit()
+		cursor.close()
+		conn.close()
+	payment_result = {
+		'number': order_id,
+		'payment': {
+			'status': tappay_response['status'],
+			'message': tappay_response['msg']
+		}
+	}
+	return jsonify({'data': payment_result})
 
 app.run(host="0.0.0.0", port=3000)
