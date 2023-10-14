@@ -1,6 +1,3 @@
-// 驗證會員身分
-authenticateUser();
-
 // 取得訂單資訊
 (function showOrderId(){
     const urlParams = new URLSearchParams(window.location.search)

@@ -18,7 +18,7 @@
             <div class="attraction__subtitle">日期：<span class="attraction__context" id="booking_date"></span></div>
             <div class="attraction__subtitle">時間：<span class="attraction__context" id="booking_time"></span></div>
             <div class="attraction__subtitle">費用：<span class="attraction__context">新台幣 <span id="booking_price"></span> 元</span></div>
-            <div class="attraction__subtitle">地點：<span class="attraction__context" id="attraction_address">臺北市 大安區忠孝東路4段</span></div>
+            <div class="attraction__subtitle">地點：<span class="attraction__context" id="attraction_address"></span></div>
         </div>
     </div>
     <hr class="separator">
@@ -66,5 +66,5 @@
 
 {% block script %}
 <script src="https://js.tappaysdk.com/sdk/tpdirect/v5.17.0"></script>
-<script type="text/javascript" src="../static/js/booking.js"></script>
+<script type="text/javascript" src="../static/js/booking.js" defer></script>
 {% endblock %}

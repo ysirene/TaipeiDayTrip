@@ -1,15 +1,15 @@
 const attraction_id = window.location.pathname.split('/')[2];
 let totalImages = 0;
 
-// 驗證會員身分
-authenticateUser();
-
 // 連線到該景點並取得資料
 (function getAttractionInfo(){
     let src = `/api/attraction/${attraction_id}`;
     let options = {};
     ajax(src, options).then((data) => {
         if(data.error){
+            if(data.message === 'cannot connect to database'){
+                alert('系統忙碌中，請稍後再試')
+            }
             window.location.href = '/';
         }else{
             document.getElementsByTagName('body')[0].style.display = 'block';
@@ -114,14 +114,15 @@ function addItemToCart(event){
             body: JSON.stringify(bookingData)
         };
         let alertErrorMsg = {
-            '會員未登入': '請先登入會員',
-            '無法連線到資料庫': '系統忙碌中，請稍後再試'
+            'not logged in': '請先登入會員',
+            'cannot connect to database': '系統忙碌中，請稍後再試',
+            'incorrect input': '預訂行程的資料有誤，請檢查後再提交一次'
         };
         ajax(src, options).then((data) => {
             if(data.ok){
                 window.location.href = '/booking';
             }else{
-                alert(alertErrorMsg[data['message']]);
+                alert(alertErrorMsg[data.message]);
             };
         });
     };

@@ -7,9 +7,6 @@ let leftArrowElem = document.querySelector('.list_bar__left_arrow');
 let rightArrowElem = document.querySelector('.list_bar__right_arrow');
 let containerElem = document.querySelector('.container');
 
-// 驗證會員身分
-authenticateUser();
-
 // 捲動顯示下一頁
 const callback = (entries) => {
     if(entries[0].isIntersecting && nextPage != null){
@@ -77,14 +74,25 @@ function renderAttractions(data){
         attractionsElem.appendChild(url);
     };
 };
+// 無法取得景點資料時，顯示錯誤訊息
+function renderAttractionsDataError(errorMsg){
+    let mainElem = document.querySelector('main');
+    let errorMessageDiv = document.createElement('div');
+    errorMessageDiv.className = 'attraction__error_msg';
+    errorMessageDiv.textContent = errorMsg;
+    mainElem.appendChild(errorMessageDiv);
+}
 // 取得景點DATA後渲染&無限捲動
 function getAttractionsData(page, keyword){
     let src = `/api/attractions?page=${encodeURIComponent(page)}&keyword=${encodeURIComponent(keyword)}`;
     let options = {};
     ajax(src, options).then((data) => {
+        if(data.message === 'cannot connect to database'){
+            renderAttractionsDataError('連線失敗，若欲查看更多景點請重新整理網頁');
+        };
         nextPage = data['nextPage'];
-        if(data['data'].length == 0){
-            attractionsElem.textContent = '找不到相關的景點';
+        if(data.data.length === 0){
+            renderAttractionsDataError('沒有相關的景點');
         }else{
             renderAttractions(data);
             observer.observe(document.querySelector('.attractions').lastChild);
@@ -96,11 +104,15 @@ function getAttractionsData(page, keyword){
 // 搜尋框按鈕
 searchBtnElem.addEventListener('click', function(e){
     e.preventDefault();
+    let attractionsDataErrorMsgElem = document.querySelector('.attraction__error_msg');
     keyword = searchKeywordElem.value;
     nextPage = 0;
     while (attractionsElem.hasChildNodes()){
         attractionsElem.removeChild(attractionsElem.lastChild);
     };
+    if(attractionsDataErrorMsgElem){
+        attractionsDataErrorMsgElem.remove();
+    }
     getAttractionsData(nextPage, keyword);
 });
 getAttractionsData(nextPage, keyword);

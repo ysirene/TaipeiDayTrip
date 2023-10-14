@@ -1,3 +1,6 @@
+.footer{
+    margin-top: 40px;
+}
 .hero_section{
     height: 320px;
     overflow: hidden;
@@ -109,7 +112,7 @@
 .attractions{
     padding: 15px;
     width: 1170px;
-    margin:0 auto 40px;
+    margin:0 auto;
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     grid-gap: 30px;
@@ -162,6 +165,14 @@
     font-size: 16px;
     font-weight: 500;
 }
+.attraction__error_msg{
+    width: 1200px;
+    padding: 0 15px;
+    margin: 0 auto;
+    color: #ab4d4d;
+    font-size: 20px;
+    font-weight: 500;
+}
 
 @media(max-width:1200px){
     .slogan{
@@ -179,6 +190,9 @@
         width: calc(100% - 30px);
         grid-template-columns: repeat(3, 1fr);
         grid-gap: 15px;
+    }
+    .attraction__error_msg{
+        width: calc(100% - 30px);
     }
 }
 @media(max-width:600px){
