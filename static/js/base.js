@@ -29,26 +29,15 @@ function authenticateUser(){
                 memberBtnElem.textContent = '登出系統';
                 memberBtnElem.setAttribute('onclick', 'signout()');
                 signinStatus = true
-            }
-            memberBtnElem.classList.remove('elem--invisible');
-            if(window.location.pathname === '/booking'){
-                if(data.data == null){
-                    window.location.href = '/';
-                }else{
-                    renderMemberInfo(data);
-                    getBookingInfo();
-                };
             };
+            memberBtnElem.classList.remove('elem--invisible');
         }).catch((error) => {
             console.log(error);
         });
-    }else if(window.location.pathname === '/booking'){
-        window.location.href = '/';
     }else{
         memberBtnElem.classList.remove('elem--invisible');
     };
 };
-authenticateUser();
 
 // 清空登入/註冊頁面的回饋訊息
 function clearReminder(){

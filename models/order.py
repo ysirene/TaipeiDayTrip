@@ -40,7 +40,7 @@ class OrderDataFetcher:
             conn.commit()
         except:
             cnx_pool.release_connection_and_cursor(conn, cursor)
-            return {'error': True, 'message': 'Incorrect order information'}, 400
+            return {'error': True, 'message': 'incorrect order information'}, 400
         
         load_dotenv('../.env')
         partner_key = os.getenv('partner_key')

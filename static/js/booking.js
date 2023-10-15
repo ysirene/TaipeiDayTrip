@@ -11,7 +11,7 @@ function renderBookingNotification(msg, type){
     textElem.textContent = msg;
     textElem.style.color = messageTypeColors[type];
     bookingInfoElem.className= '';
-}
+};
 // 渲染會員個人資訊
 function renderMemberInfo(data){
     let bodyElem = document.getElementsByTagName('body')[0];
@@ -21,7 +21,7 @@ function renderMemberInfo(data){
     memberNameElem[1].value = data.data.name;
     memberEmailElem.value = data.data.email;
     bodyElem.style.display = 'block';
-}
+};
 // 渲染預定行程資訊
 function renderBookingInfo(data){
     let bookingInfoElem = document.querySelector('#booking_info');
@@ -44,6 +44,37 @@ function renderBookingInfo(data){
     bookingPriceElem.textContent = data.data.price;
     amountElem.textContent = data.data.price;
 };
+// 驗證會員並渲染會員資訊與訂單
+function authenticateUserAndShowBookingInfo(){
+    let memberBtnElem = document.querySelector('#member_btn');
+    if(localStorage.getItem('token')){
+        let token = localStorage.getItem('token');
+        let src = '/api/user/auth';
+        let options = {
+            method: 'GET',
+            headers:{
+                'authorization': `Bearer ${token}`
+            }
+        };
+        ajax(src, options).then((data) => {
+            if(data.data != null){
+                memberBtnElem.textContent = '登出系統';
+                memberBtnElem.setAttribute('onclick', 'signout()');
+                memberBtnElem.classList.remove('elem--invisible');
+                signinStatus = true
+                renderMemberInfo(data);
+                getBookingInfo();
+            }else if(data.data == null){
+                window.location.href = '/';
+            };
+        }).catch((error) => {
+            console.log(error);
+        });
+    }else{
+        window.location.href = '/';
+    };
+};
+authenticateUserAndShowBookingInfo()
 
 // 將預定行程資料中的日期格式化
 function formatDate(date){
@@ -227,7 +258,8 @@ function confirmBooking(event) {
         let alertErrorMsg = {
             'not logged in': '請先登入會員',
             'cannot connect to database': '系統忙碌中，請稍後再試',
-            'Incorrect order information': '訂單資訊有誤，請檢查後再試'
+            'incorrect order information': '訂單資訊有誤，請檢查後再試',
+            'incorrect contact information': '聯絡資訊填寫錯誤，請檢查後再試'
         };
         ajax(src, options).then((data) => {
             if(data.error){

@@ -1,4 +1,5 @@
 import time
+import re
 
 class OrderDataProcessor:
 
@@ -36,3 +37,27 @@ class OrderDataProcessor:
             }
         }
         return {'data': payment_result}
+    
+class ContactDataChecker:
+
+    def _is_email_correct(email):
+        email_pattern = r'^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$'
+        if re.match(email_pattern, email):
+            return True
+        else:
+            return False
+        
+    def _is_phone_correct(phone):
+        phone_pattern = r'^09\d{8}$'
+        if re.match(phone_pattern, phone):
+            return True
+        else:
+            return False
+        
+    def is_contact_data_correct(data):
+        check_email = ContactDataChecker._is_email_correct(data['email'])
+        check_phone = ContactDataChecker._is_phone_correct(data['phone'])
+        if check_email and check_phone:
+            return {'ok': True}, 200
+        else:
+            return {'error': True, 'message': 'incorrect contact information'}, 400

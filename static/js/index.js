@@ -7,6 +7,9 @@ let leftArrowElem = document.querySelector('.list_bar__left_arrow');
 let rightArrowElem = document.querySelector('.list_bar__right_arrow');
 let containerElem = document.querySelector('.container');
 
+// 驗證登入狀態
+authenticateUser();
+
 // 捲動顯示下一頁
 const callback = (entries) => {
     if(entries[0].isIntersecting && nextPage != null){

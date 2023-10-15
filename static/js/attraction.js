@@ -1,6 +1,9 @@
 const attraction_id = window.location.pathname.split('/')[2];
 let totalImages = 0;
 
+// 驗證登入狀態
+authenticateUser();
+
 // 連線到該景點並取得資料
 (function getAttractionInfo(){
     let src = `/api/attraction/${attraction_id}`;
@@ -71,10 +74,15 @@ function nextSlide(){
     currentSlideIdx = (currentSlideIdx + 1) % totalImages;
     changeSlide(currentSlideIdx);
 };
-// 最早的預約日期是今天
-let today = new Date().toISOString().split('T')[0];
-let bookingDateElem = document.querySelector('.booking__date');
-bookingDateElem.min = today;
+// 最早的預約日期是明天
+(function setMinimumReservationDate(){
+    let today = new Date();
+    let tomorrow = new Date();
+    tomorrow.setDate(today.getDate() + 1);
+    let dateOfTomorrow = tomorrow.toISOString().split('T')[0];
+    let bookingDateElem = document.querySelector('.booking__date');
+    bookingDateElem.min = dateOfTomorrow;
+})();
 // 根據時段改變價錢
 let bookingTimeElem = document.querySelectorAll('input[name="time"]');
 let bookingPriceElem = document.querySelector('.booking__price');

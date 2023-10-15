@@ -1,10 +1,11 @@
 import os
 import datetime
+import re
 
 from dotenv import load_dotenv
 import jwt
 
-class UserDataProcessor:
+class TokenDataProcessor:
 
     @staticmethod
     def decode_token(auth_header):
@@ -39,3 +40,13 @@ class UserDataProcessor:
             return data['data'], 200
         else:
             return {'error': True, 'message': 'not logged in'}, 403
+        
+class SignupDataChecker:
+
+    @staticmethod
+    def check_email(email):
+        email_pattern = r'^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$'
+        if re.match(email_pattern, email):
+            return {'ok': True}, 200
+        else:
+            return {'error': True, 'message': 'invalidate email'}, 400
