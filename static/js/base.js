@@ -25,20 +25,25 @@ function authenticateUser(){
             }
         };
         ajax(src, options).then((data) => {
-            if(data['data'] != null){
+            if(data.data != null){
                 memberBtnElem.textContent = '登出系統';
                 memberBtnElem.setAttribute('onclick', 'signout()');
                 signinStatus = true
             }
             memberBtnElem.classList.remove('elem--invisible');
             if(window.location.pathname === '/booking'){
-                // TODO: 沒有登入則跳轉回首頁
-                renderMemberInfo(data);
-                getBookingInfo();
-            }
+                if(data.data == null){
+                    window.location.href = '/';
+                }else{
+                    renderMemberInfo(data);
+                    getBookingInfo();
+                };
+            };
         }).catch((error) => {
             console.log(error);
         });
+    }else if(window.location.pathname === '/booking'){
+        window.location.href = '/';
     }else{
         memberBtnElem.classList.remove('elem--invisible');
     };
