@@ -3,8 +3,6 @@ import os
 import mysql.connector
 from dotenv import load_dotenv
 
-load_dotenv('../.env')
-
 class DB_Connector:
 	_instance = None
 
@@ -15,6 +13,7 @@ class DB_Connector:
 			return cls._instance
 
 	def init_connection_pool(self):
+		load_dotenv()
 		db_config = {
 			'host': 'localhost',
 			'database': 'tripweb',
