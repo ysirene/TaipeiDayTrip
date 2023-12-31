@@ -58,7 +58,7 @@
 - JavaScript
 - AJAX
 
-#### Other
+### Other
 
 - Version Control: Git/Github
 
