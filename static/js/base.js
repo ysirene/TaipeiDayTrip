@@ -25,7 +25,7 @@ function authenticateUser(){
             }
         };
         ajax(src, options).then((data) => {
-            if(data['data'] != null){
+            if(data.data != null){
                 memberBtnElem.textContent = '登出系統';
                 memberBtnElem.setAttribute('onclick', 'signout()');
                 signinStatus = true
@@ -38,6 +38,7 @@ function authenticateUser(){
         memberBtnElem.classList.remove('elem--invisible');
     };
 };
+
 // 清空登入/註冊頁面的回饋訊息
 function clearReminder(){
     let successMessageElem = document.querySelector('.member__text--success');
@@ -95,15 +96,40 @@ function showSignupPage(){
     clearReminder();
     clearSigninValue();
 };
+// 檢查登入/註冊帳號的email格式
+function checkEmailFormat(email){
+    let emailRule = /^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/;
+    return emailRule.test(email);
+};
+// 在登入/註冊帳號的頁面顯示errorMsg
+function renderSigninSignupErrorMsg(authAction, errorMsg){
+    let authActionsMap = {
+        'signin': 0,
+        'signup': 1
+    };
+    let errorMessagesMap = {
+        'invalidate email': 'Email格式錯誤',
+        'cannot connect to database': '系統忙碌中，請稍後再試',
+        'email is already registered': 'Email已經註冊帳戶',
+        'incorrect email or password':'Email或密碼輸入錯誤'
+    };
+    let elemNum = authActionsMap[authAction];
+    let errorMessageElem = document.querySelectorAll('.member__text--error')[elemNum];
+    errorMessageElem.textContent = errorMessagesMap[errorMsg];
+};
+// 在註冊帳號的頁面顯示successMsg
+function renderSignupSuccessMsg(){
+    let successMessageElem = document.querySelector('.member__text--success');
+    successMessageElem.textContent = '註冊成功，請登入系統';
+};
 // 註冊帳號
 function signup(event){
     event.preventDefault();
     clearReminder();
     let signupFormData = new FormData(document.querySelector('#signup_form'));
-    let emailRule = /^\w+((-\w+)|(\.\w+))*\@[A-Za-z0-9]+((\.|-)[A-Za-z0-9]+)*\.[A-Za-z]+$/;
-    if(signupFormData.get('email').search(emailRule) == -1){
-        let errorMessageElem = document.querySelectorAll('.member__text--error')[1];
-        errorMessageElem.textContent = 'Email格式錯誤';
+    let email = signupFormData.get('email');
+    if(!checkEmailFormat(email)){
+        renderSigninSignupErrorMsg('signup', 'invalidate email')
     }else{
         let userData = {
             'name': signupFormData.get('name'),
@@ -121,11 +147,9 @@ function signup(event){
         ajax(src, options).then((data) => {
             clearReminder();
             if(data.error){
-                let errorMessageElem = document.querySelectorAll('.member__text--error')[1];
-                errorMessageElem.textContent = data['message'];
+                renderSigninSignupErrorMsg('signup', data.message)
             }else if(data.ok){
-                let successMessageElem = document.querySelector('.member__text--success');
-                successMessageElem.textContent = '註冊成功，請登入系統';
+                renderSignupSuccessMsg();
             };
         }).catch((error) => {
             console.log(error);
@@ -137,30 +161,34 @@ function signin(event){
     event.preventDefault();
     clearReminder();
     let signinFormData = new FormData(document.querySelector('#signin_form'));
-    let userData = {
-        'email':signinFormData.get('email'),
-        'password':signinFormData.get('password'),
-    };
-    let src = '/api/user/auth';
-    let options = {
-        method: 'PUT',
-        headers:{
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(userData)
-    };
-    ajax(src, options).then((data) => {
-        clearReminder();
-        if(data.error){
-            let errorMessageElem = document.querySelectorAll('.member__text--error')[0];
-            errorMessageElem.textContent = data['message'];
-        }else{
-            localStorage.setItem('token', data.token);
-            location.reload();
+    let email = signinFormData.get('email');
+    if(!checkEmailFormat(email)){
+        renderSigninSignupErrorMsg('signin', 'invalidate email')
+    }else{
+        let userData = {
+            'email': signinFormData.get('email'),
+            'password': signinFormData.get('password'),
         };
-    }).catch((error) => {
-        console.log(error);
-    });
+        let src = '/api/user/auth';
+        let options = {
+            method: 'PUT',
+            headers:{
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(userData)
+        };
+        ajax(src, options).then((data) => {
+            if(data.error){
+                renderSigninSignupErrorMsg('signin', data.message);
+            }else{
+                localStorage.setItem('token', data.token);
+                location.reload();
+            };
+        }).catch((error) => {
+            console.log(error);
+        });
+    }
+    
 };
 // 登出系統
 function signout(){

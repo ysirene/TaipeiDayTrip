@@ -1,7 +1,7 @@
 const attraction_id = window.location.pathname.split('/')[2];
 let totalImages = 0;
 
-// 驗證會員身分
+// 驗證登入狀態
 authenticateUser();
 
 // 連線到該景點並取得資料
@@ -10,6 +10,9 @@ authenticateUser();
     let options = {};
     ajax(src, options).then((data) => {
         if(data.error){
+            if(data.message === 'cannot connect to database'){
+                alert('系統忙碌中，請稍後再試')
+            }
             window.location.href = '/';
         }else{
             document.getElementsByTagName('body')[0].style.display = 'block';
@@ -71,10 +74,15 @@ function nextSlide(){
     currentSlideIdx = (currentSlideIdx + 1) % totalImages;
     changeSlide(currentSlideIdx);
 };
-// 最早的預約日期是今天
-let today = new Date().toISOString().split('T')[0];
-let bookingDateElem = document.querySelector('.booking__date');
-bookingDateElem.min = today;
+// 最早的預約日期是明天
+(function setMinimumReservationDate(){
+    let today = new Date();
+    let tomorrow = new Date();
+    tomorrow.setDate(today.getDate() + 1);
+    let dateOfTomorrow = tomorrow.toISOString().split('T')[0];
+    let bookingDateElem = document.querySelector('.booking__date');
+    bookingDateElem.min = dateOfTomorrow;
+})();
 // 根據時段改變價錢
 let bookingTimeElem = document.querySelectorAll('input[name="time"]');
 let bookingPriceElem = document.querySelector('.booking__price');
@@ -114,14 +122,15 @@ function addItemToCart(event){
             body: JSON.stringify(bookingData)
         };
         let alertErrorMsg = {
-            '會員未登入': '請先登入會員',
-            '無法連線到資料庫': '系統忙碌中，請稍後再試'
+            'not logged in': '請先登入會員',
+            'cannot connect to database': '系統忙碌中，請稍後再試',
+            'incorrect input': '預訂行程的資料有誤，請檢查後再提交一次'
         };
         ajax(src, options).then((data) => {
             if(data.ok){
                 window.location.href = '/booking';
             }else{
-                alert(alertErrorMsg[data['message']]);
+                alert(alertErrorMsg[data.message]);
             };
         });
     };

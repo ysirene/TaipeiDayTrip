@@ -136,3 +136,10 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# test
+test.ipynb
+test1.py
+
+# setting
+.vscode/
